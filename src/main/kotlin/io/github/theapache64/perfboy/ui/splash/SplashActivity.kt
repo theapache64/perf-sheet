@@ -1,7 +1,7 @@
 package io.github.theapache64.perfboy.ui.splash
 
 import io.github.theapache64.perfboy.app.App
-import io.github.theapache64.perfboy.ui.home.HomeActivity
+import io.github.theapache64.perfboy.ui.home.AnalyzeActivity
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent
 import javax.inject.Inject
@@ -29,7 +29,7 @@ class SplashActivity : Activity() {
 
             goToHome.observe { splashMsg ->
                 startActivity(
-                    intent = HomeActivity.getStartIntent()
+                    intent = AnalyzeActivity.getStartIntent()
                 )
             }
         }

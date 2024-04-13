@@ -3,18 +3,17 @@ package io.github.theapache64.perfboy.ui.home
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent
 import io.github.theapache64.perfboy.app.App
-import io.github.theapache64.perfboy.ui.splash.SplashViewModel
 import javax.inject.Inject
 
-class HomeActivity : Activity() {
+class AnalyzeActivity : Activity() {
     companion object {
         fun getStartIntent(): Intent {
-            return Intent(HomeActivity::class)
+            return Intent(AnalyzeActivity::class)
         }
     }
 
     @Inject
-    lateinit var viewModel: HomeViewModel
+    lateinit var viewModel: AnalyzeViewModel
 
     override fun onCreate() {
         super.onCreate()
