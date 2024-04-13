@@ -2,22 +2,26 @@ package io.github.theapache64.perfboy.ui.home
 
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent
+import io.github.theapache64.perfboy.app.App
+import io.github.theapache64.perfboy.ui.splash.SplashViewModel
+import javax.inject.Inject
 
 class HomeActivity : Activity() {
     companion object {
-
-        private const val KEY_SPLASH_MSG = "splashMsg"
-
-        fun getStartIntent(splashMsg: String): Intent {
-            return Intent(HomeActivity::class).apply {
-                putExtra(KEY_SPLASH_MSG, splashMsg)
-            }
+        fun getStartIntent(): Intent {
+            return Intent(HomeActivity::class)
         }
     }
 
+    @Inject
+    lateinit var viewModel: HomeViewModel
+
     override fun onCreate() {
         super.onCreate()
-        val splashMsg = getStringExtra(KEY_SPLASH_MSG)
-        println("Home says splash message is '$splashMsg'")
+        App.di.inject(this)
+
+        viewModel.statusMsg.observe { statusMsg ->
+            println(statusMsg)
+        }
     }
 }

@@ -29,7 +29,7 @@ class SplashActivity : Activity() {
 
             goToHome.observe { splashMsg ->
                 startActivity(
-                    intent = HomeActivity.getStartIntent(splashMsg)
+                    intent = HomeActivity.getStartIntent()
                 )
             }
         }

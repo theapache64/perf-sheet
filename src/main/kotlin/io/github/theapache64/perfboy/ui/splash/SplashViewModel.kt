@@ -5,9 +5,10 @@ import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
 import javax.inject.Inject
 
-class SplashViewModel @Inject constructor(
-    appRepo: AppRepo
-) {
+class SplashViewModel @Inject constructor() {
+    companion object{
+        private const val VERSION = "1.0.0-alpha01"
+    }
 
     private val _welcomeMsg = MutableLiveData<String>()
     val welcomeMsg: LiveData<String> = _welcomeMsg
@@ -16,9 +17,9 @@ class SplashViewModel @Inject constructor(
     val goToHome: LiveData<String> = _goToHome
 
     init {
-        val splashMsg = if (appRepo.args.isNullOrEmpty()) "🌍 Hello World!" else "👋🏻 Hello ${appRepo.args}"
+        val splashMsg = "perf-boy ($VERSION)"
         _welcomeMsg.value = splashMsg
-        _goToHome.value =splashMsg
+        _goToHome.value = splashMsg
     }
 
 
