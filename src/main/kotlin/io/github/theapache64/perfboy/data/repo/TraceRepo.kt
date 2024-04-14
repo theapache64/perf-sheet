@@ -106,7 +106,7 @@ class TraceRepoImpl @Inject constructor(
                 -beforeMethod.threadNodes.sumOf { it.durationInMs }
             }
 
-            else -> -1.0
+            else -> 0.0
         }
     }
 

@@ -35,7 +35,7 @@ enum class SheetType {
 
 class Sheet(
     prisheetType: SheetType,
-    sheet : XSSFSheet
+    sheet: XSSFSheet
 )
 
 class ExcelRepoImpl(
@@ -88,8 +88,8 @@ class ExcelRepoImpl(
         for ((methodName, result) in data) {
             val row = sheet.createRow(sheet.lastRowNum + 1)
             row.createCell(0).setCellValue(methodName)
-            row.createCell(1).setCellValue(result.beforeDurationInMs.toLong().hyphenIfMinusOne())
-            row.createCell(2).setCellValue(result.afterDurationInMs.toLong().hyphenIfMinusOne())
+            row.createCell(1).setCellValue(result.beforeDurationInMs.toLong().notPresentIfMinusOne())
+            row.createCell(2).setCellValue(result.afterDurationInMs.toLong().notPresentIfMinusOne())
             row.createCell(3).setCellValue(result.diffInMs.roundToLong().toString())
             row.createCell(4).setCellValue(
                 """
@@ -100,10 +100,13 @@ class ExcelRepoImpl(
                 """.trimIndent()
             )
             row.createCell(5).setCellValue(
-                result.beforeThreadDetails.toReadableString()
+                summerise(before = result.beforeThreadDetails, compareWith = null).ifBlank { "not present" }
             )
             row.createCell(6).setCellValue(
-                result.afterThreadDetails.toReadableString(result.beforeThreadDetails)
+                summerise(
+                    before = result.afterThreadDetails,
+                    compareWith = result.beforeThreadDetails
+                ).ifBlank { "not present" }
             )
         }
 
@@ -112,18 +115,42 @@ class ExcelRepoImpl(
     }
 }
 
-private fun List<TraceResult.ThreadDetail>.toReadableString(
-    beforeThreadDetails: List<TraceResult.ThreadDetail>? = null
+private fun summerise(
+    before: List<TraceResult.ThreadDetail>,
+    compareWith: List<TraceResult.ThreadDetail>?
 ): String {
 
-    return joinToString(separator = "\n\n") {
-        """
-            🧵 ${it.threadName}, ⏱️${it.totalDurationInMs.roundToLong()}ms, ⏹︎ (${it.noOfBlocks} block[s])
-        """.trimIndent()
+    return before.joinToString(separator = "\n") { afterThread ->
+        val summary =
+            "🧵 ${afterThread.threadName}, ⏱️${afterThread.totalDurationInMs.roundToLong()}ms, ⏹︎ (${afterThread.noOfBlocks} ${if (afterThread.noOfBlocks > 1) "blocks" else "block"})"
+        if (compareWith == null) {
+            summary
+        } else {
+            val beforeDuration =
+                compareWith.find { beforeThread -> beforeThread.threadName == afterThread.threadName }?.totalDurationInMs?.roundToLong()
+                    ?: 0
+            val afterDuration = afterThread.totalDurationInMs.roundToLong()
+            val durationDiff = afterDuration - beforeDuration
+            // if negative '-' else +, if zero nothing
+            val sign = if (durationDiff > 0) "+" else ""
+
+            val beforeBlocks =
+                compareWith.find { beforeThread -> beforeThread.threadName == afterThread.threadName }?.noOfBlocks ?: 0
+            val afterBlocks = afterThread.noOfBlocks
+            val blocksDiff = afterBlocks - beforeBlocks
+            val blockSign = if (blocksDiff > 0) "+" else ""
+
+            val comparison = "Change: $sign${durationDiff}ms, $blockSign${blocksDiff} blocks"
+
+            """
+                $summary
+                $comparison
+            """.trimIndent()
+        }
     }
 }
 
-private fun Long.hyphenIfMinusOne(): String? {
+private fun Long.notPresentIfMinusOne(): String? {
     if (this == -1L) return "not present"
     return this.toString()
 }
