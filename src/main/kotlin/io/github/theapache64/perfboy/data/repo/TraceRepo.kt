@@ -74,12 +74,12 @@ class TraceRepoImpl @Inject constructor(
                 afterThreadDetails = afterThreadDetails,
                 beforeComparison = summarise(
                     focusArea = focusArea,
-                    threadDetails = beforeThreadDetails,
+                    before = beforeThreadDetails,
                     compareWith = null
                 ).ifBlank { NOT_PRESENT },
                 afterComparison = summarise(
                     focusArea = focusArea,
-                    threadDetails = afterThreadDetails,
+                    before = afterThreadDetails,
                     compareWith = beforeThreadDetails
                 ).ifBlank { NOT_PRESENT }
 
@@ -98,33 +98,33 @@ class TraceRepoImpl @Inject constructor(
 
     private fun summarise(
         focusArea: FocusArea,
-        threadDetails: List<FinalResult.ThreadDetail>,
+        before: List<FinalResult.ThreadDetail>,
         compareWith: List<FinalResult.ThreadDetail>?
     ): String {
 
-        return threadDetails.joinToString(separator = "\n") { threadDetail ->
+        return before.joinToString(separator = "\n") { afterThread ->
             val threadName = if (focusArea != FocusArea.MAIN_THREAD_ONLY) {
-                "🧵 ${threadDetail.threadName}, "
+                "🧵 ${afterThread.threadName}, "
             } else {
                 ""
             }
             val summary =
-                "${threadName}⏱️${threadDetail.totalDurationInMs.roundToLong()}ms, ⏹︎ (${threadDetail.noOfBlocks} ${if (threadDetail.noOfBlocks > 1) "blocks" else "block"})"
+                "${threadName}⏱️${afterThread.totalDurationInMs.roundToLong()}ms, ⏹︎ (${afterThread.noOfBlocks} ${if (afterThread.noOfBlocks > 1) "blocks" else "block"})"
             if (compareWith == null) {
                 summary
             } else {
                 val beforeDuration =
-                    threadDetails.find { beforeThread -> beforeThread.threadName == threadDetail.threadName }?.totalDurationInMs?.roundToLong()
+                    compareWith.find { beforeThread -> beforeThread.threadName == afterThread.threadName }?.totalDurationInMs?.roundToLong()
                         ?: 0
-                val afterDuration = threadDetail.totalDurationInMs.roundToLong()
+                val afterDuration = afterThread.totalDurationInMs.roundToLong()
                 val durationDiff = afterDuration - beforeDuration
                 // if negative '-' else +, if zero nothing
                 val sign = if (durationDiff > 0) "+" else ""
 
                 val beforeBlocks =
-                    compareWith.find { beforeThread -> beforeThread.threadName == threadDetail.threadName }?.noOfBlocks
+                    compareWith.find { beforeThread -> beforeThread.threadName == afterThread.threadName }?.noOfBlocks
                         ?: 0
-                val afterBlocks = threadDetail.noOfBlocks
+                val afterBlocks = afterThread.noOfBlocks
                 val blocksDiff = afterBlocks - beforeBlocks
                 val blockSign = if (blocksDiff > 0) "+" else ""
 
