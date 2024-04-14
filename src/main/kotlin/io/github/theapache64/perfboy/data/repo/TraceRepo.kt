@@ -1,6 +1,6 @@
 package io.github.theapache64.perfboy.data.repo
 
-import io.github.theapache64.perfboy.data.local.ThreadDetail
+import io.github.theapache64.perfboy.data.local.ThreadNode
 import io.github.theapache64.perfboy.data.local.TraceMethod
 import io.github.theapache64.perfboy.data.local.TraceResult
 import io.github.theapache64.perfboy.traceparser.analyzer.TraceAnalyzer
@@ -25,28 +25,47 @@ class TraceRepoImpl @Inject constructor(
         for (methodName in methodNames) {
             val beforeMethod = beforeMap[methodName]
             val afterMethod = afterMap[methodName]
-            val diffInMs = getDiffInMs(beforeMethod, afterMethod)
+            val diffInMs = calculateCountDiff(beforeMethod, afterMethod)
 
-            val beforeCount = beforeMethod?.threadDetail?.size ?: -1
-            val afterCount = afterMethod?.threadDetail?.size ?: -1
-            val countLabel = getCountLabel(beforeCount, afterCount)
+            val beforeCount = beforeMethod?.threadNodes?.size ?: -1
+            val afterCount = afterMethod?.threadNodes?.size ?: -1
+            val countLabel = calculateCountLabel(beforeCount, afterCount)
+
+            val beforeThreadDetails = calculateThreadDetails(beforeMethod)
+            val afterThreadDetails = calculateThreadDetails(afterMethod)
+
 
             traceResult[methodName] = TraceResult(
                 name = methodName,
-                beforeDurationInMs = beforeMethod?.threadDetail?.sumOf { it.totalDurationInMs } ?: -1,
-                afterDurationInMs = afterMethod?.threadDetail?.sumOf { it.totalDurationInMs } ?: -1,
+                beforeDurationInMs = beforeMethod?.threadNodes?.sumOf { it.durationInMs } ?: -1,
+                afterDurationInMs = afterMethod?.threadNodes?.sumOf { it.durationInMs } ?: -1,
                 diffInMs = diffInMs,
                 beforeCount = beforeCount,
                 afterCount = afterCount,
                 countLabel = countLabel,
-                beforeThreadDetails = listOf(),
-                afterThreadDetails = listOf()
+                beforeThreadDetails = beforeThreadDetails,
+                afterThreadDetails = afterThreadDetails
             )
         }
         return traceResult.entries.sortedByDescending { it.value.diffInMs }.associateBy({ it.key }, { it.value })
     }
 
-    private fun getCountLabel(beforeCount: Int, afterCount: Int): String {
+    private fun calculateThreadDetails(beforeMethod: TraceMethod?): List<TraceResult.ThreadDetail> {
+        val threadDetails = mutableListOf<TraceResult.ThreadDetail>()
+        for (threadNode in beforeMethod?.threadNodes ?: emptyList()) {
+            var threadDetail = threadDetails.find { it.threadName == threadNode.threadName }
+            if (threadDetail == null) {
+                // first detail node
+                threadDetail = TraceResult.ThreadDetail(threadNode.threadName, noOfBlocks = 0, 0.0)
+                threadDetails.add(threadDetail)
+            }
+            threadDetail.noOfBlocks++
+            threadDetail.totalDurationInMs += threadNode.durationInMs
+        }
+        return threadDetails
+    }
+
+    private fun calculateCountLabel(beforeCount: Int, afterCount: Int): String {
         return when {
             beforeCount == afterCount -> "0"
             beforeCount > 0 && afterCount == -1 -> "Removed ($beforeCount)"
@@ -61,22 +80,22 @@ class TraceRepoImpl @Inject constructor(
         }
     }
 
-    private fun getDiffInMs(beforeMethod: TraceMethod?, afterMethod: TraceMethod?): Double {
+    private fun calculateCountDiff(beforeMethod: TraceMethod?, afterMethod: TraceMethod?): Double {
         return when {
             beforeMethod != null && afterMethod != null -> {
-                afterMethod.threadDetail.sumOf {
-                    it.totalDurationInMs
-                } - beforeMethod.threadDetail.sumOf {
-                    it.totalDurationInMs
+                afterMethod.threadNodes.sumOf {
+                    it.durationInMs
+                } - beforeMethod.threadNodes.sumOf {
+                    it.durationInMs
                 }
             }
 
             afterMethod != null -> {
-                afterMethod.threadDetail.sumOf { it.totalDurationInMs }
+                afterMethod.threadNodes.sumOf { it.durationInMs }
             }
 
             beforeMethod != null -> {
-                -beforeMethod.threadDetail.sumOf { it.totalDurationInMs}
+                -beforeMethod.threadNodes.sumOf { it.durationInMs }
             }
 
             else -> -1.0
@@ -94,15 +113,15 @@ class TraceRepoImpl @Inject constructor(
                 ) {
                     TraceMethod(
                         name = methodName,
-                        threadDetail = mutableListOf()
+                        threadNodes = mutableListOf()
                     )
                 }
 
                 val duration = method.threadEndTimeInMillisecond - method.threadStartTimeInMillisecond
-                traceMethod.threadDetail.add(
-                    ThreadDetail(
+                traceMethod.threadNodes.add(
+                    ThreadNode(
                         threadName = thread.name,
-                        totalDurationInMs = duration
+                        durationInMs = duration
                     )
                 )
             }
