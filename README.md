@@ -8,21 +8,23 @@
 <img alt="Twitter: theapache64" src="https://img.shields.io/twitter/follow/theapache64.svg?style=social" />
 </a>
 
-> A tool to analyse method trace files
+> A tool that analyzes your method trace file and generates the analysis in a spreadsheet
 
-### ✨ Demo
+### ✨ Installation
 
-![](demo.gif)
+```bash
+sudo npm install -g perf-boy 
+```
 
-## 🦿 Prerequisites
+### 📦 Usage
 
-- Java 8 or above
+```bash
+perf-boy before.trace after.trace
+```
 
-## ⌨️ Usage
+## 🚀 Demo
 
-1. Step 1
-1. Step 2
-1. Step 3
+
 
 ## ✍️ Author
 
@@ -59,13 +61,9 @@ Give a ⭐️ if this project helped you!
     <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="160">
 </a>
 
-<a href="https://www.paypal.me/theapache64" target="_blank">
-    <img src="https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif" alt="Donation" width="160">
-</a>
-
 ## ☑️ TODO
 
-- [ ] Task 1
+- [ ] Single trace file analysis
 
 ## 📝 License
 
