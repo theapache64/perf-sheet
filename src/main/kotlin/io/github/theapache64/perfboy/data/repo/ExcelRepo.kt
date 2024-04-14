@@ -61,7 +61,6 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                 fillPattern = org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND
                 setFont(workbook.createFont().apply {
                     color = org.apache.poi.ss.usermodel.IndexedColors.WHITE.index
-                    bold = true
                     fontHeightInPoints = 12
                 })
             }
@@ -75,9 +74,9 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                     cellStyle = headerStyle
                     val width = when (heading) {
                         Heading.METHOD_NAME -> 60
-                        Heading.BEFORE_MS -> 10
-                        Heading.AFTER_MS -> 10
-                        Heading.DIFF -> 10
+                        Heading.BEFORE_MS -> 13
+                        Heading.AFTER_MS -> 13
+                        Heading.DIFF -> 12
                         Heading.COUNT_DIFF -> 16
                         Heading.BEFORE_THREAD -> 60
                         Heading.AFTER_THREAD -> 60
