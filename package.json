@@ -21,7 +21,7 @@
     "shelljs": "^0.8.4"
   },
   "license": "ISC",
-  "name": "perf-boy-main",
+  "name": "perf-boy",
   "files": ["jdeploy-bundle"],
   "scripts": {"test": "echo \"Error: no test specified\" && exit 1"}
 }
