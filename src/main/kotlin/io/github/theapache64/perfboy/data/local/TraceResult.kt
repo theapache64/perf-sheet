@@ -13,8 +13,8 @@ data class TraceResult(
 ) {
     data class ThreadDetail(
         val threadName: String,
-        var noOfBlocks : Int,
+        var noOfBlocks: Int,
         var totalDurationInMs: Double,
-        var comparison : String? = null // TODO : build
+        var comparison: String? = null // TODO : build
     )
 }

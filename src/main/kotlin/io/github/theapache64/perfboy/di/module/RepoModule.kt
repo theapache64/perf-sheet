@@ -13,8 +13,10 @@ import io.github.theapache64.perfboy.data.repo.TraceRepoImpl
 abstract class RepoModule {
     @Binds
     abstract fun bindAppRepo(appRepo: AppRepoImpl): AppRepo
+
     @Binds
     abstract fun bindTraceRepo(traceRepo: TraceRepoImpl): TraceRepo
+
     @Binds
     abstract fun bindExcelRepo(excelRepo: ExcelRepoImpl): ExcelRepo
 }

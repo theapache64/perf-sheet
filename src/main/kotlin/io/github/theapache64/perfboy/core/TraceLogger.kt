@@ -6,8 +6,8 @@ import javax.inject.Singleton
 
 @Singleton
 class TraceLogger @Inject constructor(
-    var isDebug : Boolean
-)  : AppLogger {
+    var isDebug: Boolean
+) : AppLogger {
     override fun d(msg: String) {
         if (isDebug) {
             println("debug: $msg")

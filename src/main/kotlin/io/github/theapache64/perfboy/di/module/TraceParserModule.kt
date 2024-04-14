@@ -12,8 +12,8 @@ class TraceParserModule {
 
     @Singleton
     @Provides
-    fun provideAppLogger() : AppLogger {
-        return TraceLogger(isDebug = true)
+    fun provideAppLogger(): AppLogger {
+        return TraceLogger(isDebug = false)
     }
 
     @Singleton

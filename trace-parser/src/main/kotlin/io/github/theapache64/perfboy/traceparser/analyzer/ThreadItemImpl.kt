@@ -5,6 +5,6 @@ import io.github.theapache64.perfboy.traceparser.core.ThreadItem
 class ThreadItemImpl(
     override val name: String,
     override val threadId: Int
-): ThreadItem {
+) : ThreadItem {
     override fun toString() = name
 }

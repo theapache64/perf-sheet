@@ -4,26 +4,25 @@ import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
 import io.github.theapache64.perfboy.data.repo.AppRepo
 import io.github.theapache64.perfboy.data.repo.ExcelRepo
-import io.github.theapache64.perfboy.data.repo.ExcelRepoImpl
 import io.github.theapache64.perfboy.data.repo.FocusArea
 import io.github.theapache64.perfboy.data.repo.TraceRepo
 import java.io.File
 import javax.inject.Inject
 
 class AnalyzeViewModel @Inject constructor(
-    appRepo: AppRepo,
+    private val appRepo: AppRepo,
     private val traceRepo: TraceRepo,
     private val excelRepo: ExcelRepo
 ) {
 
-    companion object{
+    companion object {
         const val SUCCESS_MSG = "Done ✅"
     }
 
     private val _statusMsg = MutableLiveData<String>()
     val statusMsg: LiveData<String> = _statusMsg
 
-    init {
+    fun init() {
         val args = appRepo.args
         when (args?.size) {
             null -> {
@@ -38,7 +37,7 @@ class AnalyzeViewModel @Inject constructor(
             }
 
             2 -> {
-                val beforeTrace = File(args[0]).takeIf { it.exists() } ?: error("Before tr")
+                val beforeTrace = File(args[0]).takeIf { it.exists() } ?: error("Before trace doesn't exist")
                 val afterTrace = File(args[1]).takeIf { it.exists() } ?: error("After trace doesn't exist")
                 analyzeAndCompare(beforeTrace, afterTrace)
                 _statusMsg.value = SUCCESS_MSG
@@ -51,7 +50,9 @@ class AnalyzeViewModel @Inject constructor(
     }
 
     private fun analyzeAndCompare(beforeTrace: File, afterTrace: File) {
+        _statusMsg.value = "📖 Parsing traces..."
         traceRepo.init(beforeTrace, afterTrace)
+        _statusMsg.value = "🔍 Comparing traces..."
 
         val allThreadsResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS)
         val mainThreadOnly = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
@@ -59,13 +60,15 @@ class AnalyzeViewModel @Inject constructor(
 
         val excelFileName = "${beforeTrace.nameWithoutExtension}-vs-${afterTrace.nameWithoutExtension}.xlsx"
         val excelFile = File(beforeTrace.parent, excelFileName)
+        _statusMsg.value = "📝 Writing to spreadsheet (${excelFile.name})... "
         excelRepo.make(
             excelFile,
             allThreadsResult,
             mainThreadOnly,
-            backgroundThreadsOnly
+            backgroundThreadsOnly,
+            onProgress = {
+                _statusMsg.value = it
+            }
         )
-
-        _statusMsg.value = SUCCESS_MSG
     }
 }

@@ -1,9 +1,8 @@
 package io.github.theapache64.perfboy.data.repo
 
 import io.github.theapache64.perfboy.DaggerTestAppComponent
-import org.junit.jupiter.api.Test
-
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 import java.io.File
 import javax.inject.Inject
 
@@ -14,7 +13,7 @@ class TraceRepoImplTest {
     lateinit var traceRepoImpl: TraceRepoImpl
 
     @BeforeEach
-    fun before(){
+    fun before() {
         DaggerTestAppComponent.create().inject(this)
     }
 

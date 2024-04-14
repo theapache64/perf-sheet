@@ -22,5 +22,7 @@ class AnalyzeActivity : Activity() {
         viewModel.statusMsg.observe { statusMsg ->
             println(statusMsg)
         }
+
+        viewModel.init()
     }
 }

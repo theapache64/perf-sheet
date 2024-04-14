@@ -30,6 +30,10 @@ dependencies {
 
     implementation("de.siegmar:fastcsv:3.1.0")
 
+    // log4j - to fix console warning
+    implementation("org.apache.logging.log4j:log4j-core:2.23.1")
+    implementation("org.apache.logging.log4j:log4j-api:2.23.1")
+
     // apache poi for excel manipulation
     val poiVersion = "5.2.4"
     implementation("org.apache.poi:poi:$poiVersion")
