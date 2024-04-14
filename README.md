@@ -24,6 +24,31 @@ perf-boy before.trace after.trace
 
 ## 🚀 Demo
 
+**Usage**
+```bash                                                              ✘ INT
+❯ ls
+after.trace  before.trace
+❯ perf-boy before.trace after.trace
+perf-boy (0.0.2)
+📖 Parsing traces... (this step may take a while)
+🔍 Comparing traces...
+📝 Writing to spreadsheet (before-vs-after.xlsx)...
+📜 Creating sheet: All Threads
+📝 Writing data to sheet: All Threads
+📜 Creating sheet: Main Thread
+📝 Writing data to sheet: Main Thread
+📜 Creating sheet: Background Threads
+📝 Writing data to sheet: Background Threads
+🚀 Writing to file: before-vs-after.xlsx
+Done ✅
+❯ ls
+after.trace before-vs-after.xlsx before.trace
+```
+
+**Output**
+
+![image](https://github.com/theapache64/perf-boy/assets/9678279/99ebdcfc-1271-4be3-b563-a960b75f2294)
+
 
 
 ## ✍️ Author
