@@ -50,7 +50,7 @@ class AnalyzeViewModel @Inject constructor(
     }
 
     private fun analyzeAndCompare(beforeTrace: File, afterTrace: File) {
-        _statusMsg.value = "📖 Parsing traces..."
+        _statusMsg.value = "📖 Parsing traces... (this step may take a while)"
         traceRepo.init(beforeTrace, afterTrace)
         _statusMsg.value = "🔍 Comparing traces..."
 

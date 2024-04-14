@@ -1,27 +1,22 @@
 package io.github.theapache64.perfboy.data.repo
 
-import io.github.theapache64.perfboy.data.local.TraceResult
+import io.github.theapache64.perfboy.model.FinalResult
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import javax.inject.Inject
-import kotlin.math.roundToLong
 
 interface ExcelRepo {
     fun make(
         xlsFile: File,
-        allThreadData: Map<String, TraceResult>,
-        mainThreadData: Map<String, TraceResult>,
-        backgroundThreadData: Map<String, TraceResult>,
+        allThreadData: Map<String, FinalResult>,
+        mainThreadData: Map<String, FinalResult>,
+        backgroundThreadData: Map<String, FinalResult>,
         onProgress: (String) -> Unit,
     )
 }
 
 
 class ExcelRepoImpl @Inject constructor() : ExcelRepo {
-
-    companion object{
-        private const val NOT_PRESENT = "not present"
-    }
 
     enum class SheetTypes(val title: String) {
         ALL_THREADS("All Threads"),
@@ -33,7 +28,7 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         METHOD_NAME("Method Name"),
         BEFORE_MS("Before (ms)"),
         AFTER_MS("After (ms)"),
-        DIFF("Diff"),
+        DIFF("Diff (ms)"),
         COUNT_DIFF("Count diff"),
         BEFORE_THREAD("Before Thread"),
         AFTER_THREAD("After Thread");
@@ -41,12 +36,12 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
 
     override fun make(
         xlsFile: File,
-        allThreadData: Map<String, TraceResult>,
-        mainThreadData: Map<String, TraceResult>,
-        backgroundThreadData: Map<String, TraceResult>,
+        allThreadData: Map<String, FinalResult>,
+        mainThreadData: Map<String, FinalResult>,
+        backgroundThreadData: Map<String, FinalResult>,
         onProgress: (String) -> Unit,
     ) {
-        val sheetMap = mapOf<SheetTypes, Map<String, TraceResult>>(
+        val sheetMap = mapOf<SheetTypes, Map<String, FinalResult>>(
             SheetTypes.ALL_THREADS to allThreadData,
             SheetTypes.MAIN_THREAD to mainThreadData,
             SheetTypes.BACKGROUND_THREADS to backgroundThreadData
@@ -101,32 +96,12 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
             for ((methodName, result) in sheetData) {
                 val row = sheet.createRow(sheet.lastRowNum + 1)
                 row.createCell(0).setCellValue(methodName)
-                row.createCell(1).setCellValue(result.beforeDurationInMs.toLong().notPresentIfMinusOne())
-                row.createCell(2).setCellValue(result.afterDurationInMs.toLong().notPresentIfMinusOne())
-                row.createCell(3).setCellValue(result.diffInMs.roundToLong().toString())
-
-                row.createCell(4).setCellValue(
-                    """
-                    Before: ${result.beforeCount.takeIf { it >= 1 } ?: NOT_PRESENT}
-                    After: ${result.afterCount.takeIf { it >= 1 } ?: NOT_PRESENT}
-                    
-                    ${result.countLabel}
-                """.trimIndent()
-                )
-                row.createCell(5).setCellValue(
-                    summarise(
-                        sheetType = sheetType,
-                        before = result.beforeThreadDetails,
-                        compareWith = null
-                    ).ifBlank { NOT_PRESENT }
-                )
-                row.createCell(6).setCellValue(
-                    summarise(
-                        sheetType = sheetType,
-                        before = result.afterThreadDetails,
-                        compareWith = result.beforeThreadDetails
-                    ).ifBlank { NOT_PRESENT }
-                )
+                row.createCell(1).setCellValue(result.beforeDurationInMs)
+                row.createCell(2).setCellValue(result.afterDurationInMs)
+                row.createCell(3).setCellValue(result.diffInMs)
+                row.createCell(4).setCellValue(result.countComparison)
+                row.createCell(5).setCellValue(result.beforeComparison)
+                row.createCell(6).setCellValue(result.afterComparison)
             }
         }
 
@@ -136,51 +111,5 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
     }
 
 
-    private fun summarise(
-        sheetType: SheetTypes,
-        before: List<TraceResult.ThreadDetail>,
-        compareWith: List<TraceResult.ThreadDetail>?
-    ): String {
-
-        return before.joinToString(separator = "\n") { afterThread ->
-            val threadName = if (sheetType != SheetTypes.MAIN_THREAD) {
-                "🧵 ${afterThread.threadName}, "
-            } else {
-                ""
-            }
-            val summary =
-                "${threadName}⏱️${afterThread.totalDurationInMs.roundToLong()}ms, ⏹︎ (${afterThread.noOfBlocks} ${if (afterThread.noOfBlocks > 1) "blocks" else "block"})"
-            if (compareWith == null) {
-                summary
-            } else {
-                val beforeDuration =
-                    compareWith.find { beforeThread -> beforeThread.threadName == afterThread.threadName }?.totalDurationInMs?.roundToLong()
-                        ?: 0
-                val afterDuration = afterThread.totalDurationInMs.roundToLong()
-                val durationDiff = afterDuration - beforeDuration
-                // if negative '-' else +, if zero nothing
-                val sign = if (durationDiff > 0) "+" else ""
-
-                val beforeBlocks =
-                    compareWith.find { beforeThread -> beforeThread.threadName == afterThread.threadName }?.noOfBlocks
-                        ?: 0
-                val afterBlocks = afterThread.noOfBlocks
-                val blocksDiff = afterBlocks - beforeBlocks
-                val blockSign = if (blocksDiff > 0) "+" else ""
-
-                val comparison = "Change: $sign${durationDiff}ms, $blockSign${blocksDiff} blocks"
-
-                """
-                $summary
-                $comparison
-            """.trimIndent()
-            }
-        }
-    }
-
-    private fun Long.notPresentIfMinusOne(): String? {
-        if (this == -1L) return NOT_PRESENT
-        return this.toString()
-    }
 }
 
