@@ -1,12 +1,11 @@
 package io.github.theapache64.perfboy.ui.splash
 
-import io.github.theapache64.perfboy.data.repo.AppRepo
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
 import javax.inject.Inject
 
 class SplashViewModel @Inject constructor() {
-    companion object{
+    companion object {
         private const val VERSION = "1.0.0-alpha01"
     }
 

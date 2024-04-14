@@ -1,7 +1,7 @@
 package io.github.theapache64.perfboy.app
 
-import io.github.theapache64.perfboy.ui.splash.SplashActivity
 import com.theapache64.cyclone.core.Application
+import io.github.theapache64.perfboy.ui.splash.SplashActivity
 import javax.inject.Inject
 
 

@@ -24,6 +24,8 @@ dependencies {
     implementation("com.google.dagger:dagger:$daggerVersion")
     kapt("com.google.dagger:dagger-compiler:$daggerVersion")
 
+    implementation(project(":trace-parser"))
+
     // Test deps
     testImplementation(kotlin("test"))
 }
