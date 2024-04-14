@@ -59,8 +59,8 @@ class TraceRepoImpl @Inject constructor(
 
             finalResult[methodName] = FinalResult(
                 name = methodName,
-                beforeDurationInMs = (beforeMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong().notPresentIfMinusOne(),
-                afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong().notPresentIfMinusOne(),
+                beforeDurationInMs = (beforeMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
+                afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
                 diffInMs = diffInMs,
                 beforeCount = beforeCount,
                 afterCount = afterCount,

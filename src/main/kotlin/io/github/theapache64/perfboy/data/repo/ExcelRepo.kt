@@ -95,9 +95,9 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
             for ((methodName, result) in sheetData) {
                 val row = sheet.createRow(sheet.lastRowNum + 1)
                 row.createCell(0).setCellValue(methodName)
-                row.createCell(1).setCellValue(result.beforeDurationInMs)
-                row.createCell(2).setCellValue(result.afterDurationInMs)
-                row.createCell(3).setCellValue(result.diffInMs.toString())
+                row.createCell(1).setCellValue(result.beforeDurationInMs.toDouble())
+                row.createCell(2).setCellValue(result.afterDurationInMs.toDouble())
+                row.createCell(3).setCellValue(result.diffInMs.toDouble())
                 row.createCell(4).setCellValue(result.countComparison)
                 row.createCell(5).setCellValue(result.beforeComparison)
                 row.createCell(6).setCellValue(result.afterComparison)

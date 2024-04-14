@@ -2,8 +2,8 @@ package io.github.theapache64.perfboy.model
 
 data class FinalResult(
     val name: String,
-    val beforeDurationInMs: String,
-    val afterDurationInMs: String,
+    val beforeDurationInMs: Long,
+    val afterDurationInMs: Long,
     val diffInMs: Long,
     val beforeCount: Int,
     val afterCount: Int,
