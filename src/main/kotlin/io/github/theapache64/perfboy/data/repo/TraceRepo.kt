@@ -62,7 +62,15 @@ class TraceRepoImpl @Inject constructor(
             threadDetail.noOfBlocks++
             threadDetail.totalDurationInMs += threadNode.durationInMs
         }
-        return threadDetails
+
+        // compare by total duration but if there's threadName == "main", it should be always first
+        return threadDetails.sortedByDescending {
+            if (it.threadName == "main") {
+                Long.MAX_VALUE
+            } else {
+                it.totalDurationInMs.toLong()
+            }
+        }
     }
 
     private fun calculateCountLabel(beforeCount: Int, afterCount: Int): String {

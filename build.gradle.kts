@@ -28,6 +28,11 @@ dependencies {
 
     implementation(project(":trace-parser"))
 
+    implementation("de.siegmar:fastcsv:3.1.0")
+
+    // apache poi for excel manipulation
+    implementation("org.apache.poi:poi:5.2.4")
+
     // Test deps
     testImplementation(kotlin("test"))
     testImplementation("io.mockk:mockk:1.13.10")
