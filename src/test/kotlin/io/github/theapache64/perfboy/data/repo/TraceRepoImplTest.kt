@@ -20,13 +20,22 @@ class TraceRepoImplTest {
 
     @Test
     fun parseTest() {
-        val result = traceRepoImpl.parse(
-            // TODO: Move these files to src/test/resources
-            beforeTrace = File("/Users/theapache64/Desktop/perf-boy/before.trace"),
-            afterTrace = File("/Users/theapache64/Desktop/perf-boy/after.trace")
-        )
 
-        ExcelRepoImpl().write(File("/Users/theapache64/Desktop/perf-boy/perf-boy.xlsx"), result)
-        assert(result.isNotEmpty())
+        val beforeTrace = File("/Users/theapache64/Desktop/perf-boy/before.trace")
+        val afterTrace = File("/Users/theapache64/Desktop/perf-boy/after.trace")
+
+        traceRepoImpl.init(beforeTrace, afterTrace)
+
+        val allThreadsResult = traceRepoImpl.parse(focusArea = FocusArea.ALL_THREADS)
+        val mainThreadOnly = traceRepoImpl.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
+        val backgroundThreadsOnly = traceRepoImpl.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
+
+        ExcelRepoImpl().make(
+            File("/Users/theapache64/Desktop/perf-boy/perf-boy.xlsx"),
+            allThreadsResult,
+            mainThreadOnly,
+            backgroundThreadsOnly
+        )
+        assert(allThreadsResult.isNotEmpty())
     }
 }

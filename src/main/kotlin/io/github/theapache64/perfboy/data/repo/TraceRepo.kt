@@ -3,23 +3,39 @@ package io.github.theapache64.perfboy.data.repo
 import io.github.theapache64.perfboy.data.local.ThreadNode
 import io.github.theapache64.perfboy.data.local.TraceMethod
 import io.github.theapache64.perfboy.data.local.TraceResult
+import io.github.theapache64.perfboy.traceparser.analyzer.AnalyzerResultImpl
 import io.github.theapache64.perfboy.traceparser.analyzer.TraceAnalyzer
 import io.github.theapache64.perfboy.traceparser.core.AnalyzerResult
 import java.io.File
 import javax.inject.Inject
 
+enum class FocusArea {
+    ALL_THREADS,
+    MAIN_THREAD_ONLY,
+    BACKGROUND_THREADS_ONLY
+}
+
 interface TraceRepo {
-    fun parse(beforeTrace: File, afterTrace: File): Map<String, TraceResult>
+    fun parse(focusArea: FocusArea): Map<String, TraceResult>
 }
 
 class TraceRepoImpl @Inject constructor(
     private val traceAnalyzer: TraceAnalyzer
 ) : TraceRepo {
-    override fun parse(beforeTrace: File, afterTrace: File): Map<String, TraceResult> {
+    private lateinit var beforeAnalysisResult: AnalyzerResultImpl
+    private lateinit var afterAnalysisResult: AnalyzerResultImpl
+
+    fun init(beforeTrace: File, afterTrace: File) {
+        this.beforeAnalysisResult = traceAnalyzer.analyze(beforeTrace)
+        this.afterAnalysisResult = traceAnalyzer.analyze(afterTrace)
+    }
+
+    override fun parse(
+        focusArea: FocusArea,
+    ): Map<String, TraceResult> {
         val traceResult = mutableMapOf<String, TraceResult>()
-        // parse before trace first
-        val beforeMap = traceAnalyzer.analyze(beforeTrace).toMap()
-        val afterMap = traceAnalyzer.analyze(afterTrace).toMap()
+        val beforeMap = beforeAnalysisResult.toMap(focusArea)
+        val afterMap = afterAnalysisResult.toMap(focusArea)
 
         val methodNames = beforeMap.keys + afterMap.keys
         for (methodName in methodNames) {
@@ -110,10 +126,19 @@ class TraceRepoImpl @Inject constructor(
         }
     }
 
-    private fun AnalyzerResult.toMap(): Map<String, TraceMethod> {
+    private fun AnalyzerResult.toMap(focusArea: FocusArea): Map<String, TraceMethod> {
         val resultMap = mutableMapOf<String, TraceMethod>()
         for ((threadId, allMethods) in this.data) {
             val thread = this.threads.find { it.threadId == threadId } ?: error("Thread not found: '$threadId'")
+
+            when (focusArea) {
+                FocusArea.MAIN_THREAD_ONLY -> if (thread.threadId != mainThreadId) continue
+                FocusArea.BACKGROUND_THREADS_ONLY -> if (thread.threadId == mainThreadId) continue
+                FocusArea.ALL_THREADS -> {
+                    // all threads pls
+                }
+            }
+
             for (method in allMethods) {
                 val methodName = method.name
                 val traceMethod = resultMap.getOrPut(

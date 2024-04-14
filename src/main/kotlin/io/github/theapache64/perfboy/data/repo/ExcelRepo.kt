@@ -42,72 +42,84 @@ class ExcelRepoImpl(
 
 ) : ExcelRepo {
 
-    fun write(
+    fun make(
         xlsFile: File,
-        data: Map<String, TraceResult>
+        allThreadData: Map<String, TraceResult>,
+        mainThreadData: Map<String, TraceResult>,
+        backgroundThreadData: Map<String, TraceResult>
     ) {
+        val sheetMap = mapOf<String, Map<String, TraceResult>>(
+            "All Threads" to allThreadData,
+            "Main Thread" to mainThreadData,
+            "Background Threads" to backgroundThreadData
+        )
+
+
         val workbook = XSSFWorkbook()
-        val sheet = workbook.createSheet("All Threads")
 
-        // Creating style for black background and white font color with bigger font size
-        val headerStyle = workbook.createCellStyle().apply {
-            fillForegroundColor = org.apache.poi.ss.usermodel.IndexedColors.BLACK.index
-            fillPattern = org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND
-            setFont(workbook.createFont().apply {
-                color = org.apache.poi.ss.usermodel.IndexedColors.WHITE.index
-                bold = true
-                fontHeightInPoints = 12
-            })
-        }
+        for ((sheetTitle, sheetData) in sheetMap) {
+            val sheet = workbook.createSheet(sheetTitle)
 
-        val headerRow = sheet.createRow(0)
-
-        // Heading
-        for ((index, heading) in Heading.entries.withIndex()) {
-            headerRow.createCell(index).apply {
-                setCellValue(heading.title)
-                cellStyle = headerStyle
-                val width = when (heading) {
-                    METHOD_NAME -> 60
-                    BEFORE_MS -> 10
-                    AFTER_MS -> 10
-                    DIFF -> 10
-                    COUNT_DIFF -> 16
-                    BEFORE_THREAD -> 60
-                    AFTER_THREAD -> 60
-                }
-
-                sheet.setColumnWidth(index, width * 256)
+            // Creating style for black background and white font color with bigger font size
+            val headerStyle = workbook.createCellStyle().apply {
+                fillForegroundColor = org.apache.poi.ss.usermodel.IndexedColors.BLACK.index
+                fillPattern = org.apache.poi.ss.usermodel.FillPatternType.SOLID_FOREGROUND
+                setFont(workbook.createFont().apply {
+                    color = org.apache.poi.ss.usermodel.IndexedColors.WHITE.index
+                    bold = true
+                    fontHeightInPoints = 12
+                })
             }
-        }
 
-        // Freeze first row
-        sheet.createFreezePane(0, 1)
+            val headerRow = sheet.createRow(0)
 
-        // Data
-        for ((methodName, result) in data) {
-            val row = sheet.createRow(sheet.lastRowNum + 1)
-            row.createCell(0).setCellValue(methodName)
-            row.createCell(1).setCellValue(result.beforeDurationInMs.toLong().notPresentIfMinusOne())
-            row.createCell(2).setCellValue(result.afterDurationInMs.toLong().notPresentIfMinusOne())
-            row.createCell(3).setCellValue(result.diffInMs.roundToLong().toString())
-            row.createCell(4).setCellValue(
-                """
+            // Heading
+            for ((index, heading) in Heading.entries.withIndex()) {
+                headerRow.createCell(index).apply {
+                    setCellValue(heading.title)
+                    cellStyle = headerStyle
+                    val width = when (heading) {
+                        METHOD_NAME -> 60
+                        BEFORE_MS -> 10
+                        AFTER_MS -> 10
+                        DIFF -> 10
+                        COUNT_DIFF -> 16
+                        BEFORE_THREAD -> 60
+                        AFTER_THREAD -> 60
+                    }
+
+                    sheet.setColumnWidth(index, width * 256)
+                }
+            }
+
+            // Freeze first row
+            sheet.createFreezePane(0, 1)
+
+            // Data
+            for ((methodName, result) in sheetData) {
+                val row = sheet.createRow(sheet.lastRowNum + 1)
+                row.createCell(0).setCellValue(methodName)
+                row.createCell(1).setCellValue(result.beforeDurationInMs.toLong().notPresentIfMinusOne())
+                row.createCell(2).setCellValue(result.afterDurationInMs.toLong().notPresentIfMinusOne())
+                row.createCell(3).setCellValue(result.diffInMs.roundToLong().toString())
+                row.createCell(4).setCellValue(
+                    """
                     Before: ${result.beforeCount.takeIf { it > 1 } ?: "not present"}
                     After: ${result.afterCount.takeIf { it > 1 } ?: "not present"}
                     
                     ${result.countLabel}
                 """.trimIndent()
-            )
-            row.createCell(5).setCellValue(
-                summerise(before = result.beforeThreadDetails, compareWith = null).ifBlank { "not present" }
-            )
-            row.createCell(6).setCellValue(
-                summerise(
-                    before = result.afterThreadDetails,
-                    compareWith = result.beforeThreadDetails
-                ).ifBlank { "not present" }
-            )
+                )
+                row.createCell(5).setCellValue(
+                    summerise(before = result.beforeThreadDetails, compareWith = null).ifBlank { "not present" }
+                )
+                row.createCell(6).setCellValue(
+                    summerise(
+                        before = result.afterThreadDetails,
+                        compareWith = result.beforeThreadDetails
+                    ).ifBlank { "not present" }
+                )
+            }
         }
 
         workbook.write(xlsFile.outputStream())
