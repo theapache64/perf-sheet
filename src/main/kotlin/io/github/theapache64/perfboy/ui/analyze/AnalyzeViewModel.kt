@@ -1,15 +1,19 @@
-package io.github.theapache64.perfboy.ui.home
+package io.github.theapache64.perfboy.ui.analyze
 
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
 import io.github.theapache64.perfboy.data.repo.AppRepo
+import io.github.theapache64.perfboy.data.repo.ExcelRepo
+import io.github.theapache64.perfboy.data.repo.ExcelRepoImpl
+import io.github.theapache64.perfboy.data.repo.FocusArea
 import io.github.theapache64.perfboy.data.repo.TraceRepo
 import java.io.File
 import javax.inject.Inject
 
 class AnalyzeViewModel @Inject constructor(
     appRepo: AppRepo,
-    private val traceRepo: TraceRepo
+    private val traceRepo: TraceRepo,
+    private val excelRepo: ExcelRepo
 ) {
 
     companion object{
@@ -47,6 +51,21 @@ class AnalyzeViewModel @Inject constructor(
     }
 
     private fun analyzeAndCompare(beforeTrace: File, afterTrace: File) {
+        traceRepo.init(beforeTrace, afterTrace)
 
+        val allThreadsResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS)
+        val mainThreadOnly = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
+        val backgroundThreadsOnly = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
+
+        val excelFileName = "${beforeTrace.nameWithoutExtension}-vs-${afterTrace.nameWithoutExtension}.xlsx"
+        val excelFile = File(beforeTrace.parent, excelFileName)
+        excelRepo.make(
+            excelFile,
+            allThreadsResult,
+            mainThreadOnly,
+            backgroundThreadsOnly
+        )
+
+        _statusMsg.value = SUCCESS_MSG
     }
 }

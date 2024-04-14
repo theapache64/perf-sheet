@@ -11,10 +11,16 @@ import io.github.theapache64.perfboy.data.repo.Heading.METHOD_NAME
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
+import javax.inject.Inject
 import kotlin.math.roundToLong
 
 interface ExcelRepo {
-
+    fun make(
+        xlsFile: File,
+        allThreadData: Map<String, TraceResult>,
+        mainThreadData: Map<String, TraceResult>,
+        backgroundThreadData: Map<String, TraceResult>
+    )
 }
 
 enum class Heading(val title: String) {
@@ -38,11 +44,8 @@ class Sheet(
     sheet: XSSFSheet
 )
 
-class ExcelRepoImpl(
-
-) : ExcelRepo {
-
-    fun make(
+class ExcelRepoImpl @Inject constructor() : ExcelRepo {
+    override fun make(
         xlsFile: File,
         allThreadData: Map<String, TraceResult>,
         mainThreadData: Map<String, TraceResult>,

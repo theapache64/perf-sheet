@@ -16,6 +16,7 @@ enum class FocusArea {
 }
 
 interface TraceRepo {
+    fun init(beforeTrace: File, afterTrace: File)
     fun parse(focusArea: FocusArea): Map<String, TraceResult>
 }
 
@@ -25,7 +26,7 @@ class TraceRepoImpl @Inject constructor(
     private lateinit var beforeAnalysisResult: AnalyzerResultImpl
     private lateinit var afterAnalysisResult: AnalyzerResultImpl
 
-    fun init(beforeTrace: File, afterTrace: File) {
+    override fun init(beforeTrace: File, afterTrace: File) {
         this.beforeAnalysisResult = traceAnalyzer.analyze(beforeTrace)
         this.afterAnalysisResult = traceAnalyzer.analyze(afterTrace)
     }

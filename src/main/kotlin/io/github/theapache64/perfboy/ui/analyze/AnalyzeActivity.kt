@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.ui.home
+package io.github.theapache64.perfboy.ui.analyze
 
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent

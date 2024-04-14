@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.ui.home
+package io.github.theapache64.perfboy.ui.analyze
 
 import io.github.theapache64.perfboy.DaggerTestAppComponent
 import io.github.theapache64.perfboy.data.repo.AppRepo

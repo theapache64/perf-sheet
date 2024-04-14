@@ -3,7 +3,7 @@ package io.github.theapache64.perfboy.ui.splash
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent
 import io.github.theapache64.perfboy.app.App
-import io.github.theapache64.perfboy.ui.home.AnalyzeActivity
+import io.github.theapache64.perfboy.ui.analyze.AnalyzeActivity
 import javax.inject.Inject
 
 class SplashActivity : Activity() {
