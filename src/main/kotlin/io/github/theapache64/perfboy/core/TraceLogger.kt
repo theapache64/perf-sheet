@@ -9,23 +9,32 @@ class TraceLogger @Inject constructor(
     var isDebug : Boolean
 )  : AppLogger {
     override fun d(msg: String) {
-        TODO("Not yet implemented")
+        if (isDebug) {
+            println("debug: $msg")
+        }
     }
 
     override fun e(msg: String) {
-        TODO("Not yet implemented")
+        if (isDebug) {
+            println("error: $msg")
+        }
     }
 
     override fun e(msg: String, t: Throwable) {
-        TODO("Not yet implemented")
+        if (isDebug) {
+            println("error: $msg : ${t.message}")
+        }
     }
 
     override fun w(msg: String) {
-        TODO("Not yet implemented")
+        if (isDebug) {
+            println("warning: $msg")
+        }
     }
 
     override fun i(msg: String) {
-        TODO("Not yet implemented")
+        if (isDebug) {
+            println("info: $msg")
+        }
     }
-
 }

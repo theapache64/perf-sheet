@@ -1,6 +1,7 @@
 package io.github.theapache64.perfboy
 
 import dagger.Component
+import io.github.theapache64.perfboy.data.repo.TraceRepoImplTest
 import io.github.theapache64.perfboy.di.AppComponent
 import io.github.theapache64.perfboy.di.module.RepoModule
 import io.github.theapache64.perfboy.di.module.TraceParserModule
@@ -18,4 +19,5 @@ import javax.inject.Singleton
 )
 interface TestAppComponent {
     fun inject(analyzeViewModelTest: AnalyzeViewModelTest)
+    fun inject(traceRepoImplTest: TraceRepoImplTest)
 }
