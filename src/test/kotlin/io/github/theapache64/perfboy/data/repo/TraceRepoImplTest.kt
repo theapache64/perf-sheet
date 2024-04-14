@@ -10,7 +10,10 @@ class TraceRepoImplTest {
 
 
     @Inject
-    lateinit var traceRepoImpl: TraceRepoImpl
+    lateinit var traceRepo: TraceRepo
+
+    @Inject
+    lateinit var excelRepo: ExcelRepo
 
     @BeforeEach
     fun before() {
@@ -23,17 +26,20 @@ class TraceRepoImplTest {
         val beforeTrace = File("/Users/theapache64/Desktop/perf-boy/before.trace")
         val afterTrace = File("/Users/theapache64/Desktop/perf-boy/after.trace")
 
-        traceRepoImpl.init(beforeTrace, afterTrace)
+        traceRepo.init(beforeTrace, afterTrace)
 
-        val allThreadsResult = traceRepoImpl.parse(focusArea = FocusArea.ALL_THREADS)
-        val mainThreadOnly = traceRepoImpl.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
-        val backgroundThreadsOnly = traceRepoImpl.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
+        val allThreadsResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS)
+        val mainThreadOnly = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
+        val backgroundThreadsOnly = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
 
-        ExcelRepoImpl().make(
+        excelRepo.make(
             File("/Users/theapache64/Desktop/perf-boy/perf-boy.xlsx"),
             allThreadsResult,
             mainThreadOnly,
-            backgroundThreadsOnly
+            backgroundThreadsOnly,
+            onProgress = {
+                println(it)
+            }
         )
         assert(allThreadsResult.isNotEmpty())
     }

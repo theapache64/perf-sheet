@@ -1,6 +1,6 @@
 ![](cover.jpeg)
 
-# perf-boy [WIP]
+# 🧑‍🎤 perf-boy [WIP]
 
 ![buildStatus](https://img.shields.io/github/workflow/status/theapache64/perf-boy/Java%20CI%20with%20Gradle?style=plastic)
 ![latestVersion](https://img.shields.io/github/v/release/theapache64/perf-boy)
