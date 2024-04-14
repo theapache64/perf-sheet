@@ -1,6 +1,6 @@
 plugins {
-    kotlin("jvm") version "1.7.10"
-    kotlin("kapt") version "1.7.10" // TODO: Use single version number
+    kotlin("jvm") version "1.9.0"
+    kotlin("kapt") version "1.9.0" // TODO: Use single version number
     application
 }
 
@@ -8,6 +8,7 @@ group = "io.github.theapache64.perfboy"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    google()
     mavenCentral()
     maven {
         url = uri("https://jitpack.io")
@@ -20,14 +21,17 @@ dependencies {
     implementation("com.github.theapache64:cyclone:1.0.0-alpha02")
 
     // Dagger : A fast dependency injector for Android and Java.
-    val daggerVersion = "2.44.2"
+    val daggerVersion = "2.51.1"
     implementation("com.google.dagger:dagger:$daggerVersion")
     kapt("com.google.dagger:dagger-compiler:$daggerVersion")
+    kaptTest("com.google.dagger:dagger-compiler:$daggerVersion")
 
     implementation(project(":trace-parser"))
 
     // Test deps
     testImplementation(kotlin("test"))
+    testImplementation("io.mockk:mockk:1.13.10")
+
 }
 
 tasks.test {
