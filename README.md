@@ -9,6 +9,8 @@
 
 > A tool that analyzes your method trace file and generates the analysis in a spreadsheet
 
+Finding performance regression in your app is tough. This tool helps you identify the most time-consuming tasks in your trace and shows how they were performing previously and how they are performing currently. 
+
 ### ✨ Installation
 
 ```bash
