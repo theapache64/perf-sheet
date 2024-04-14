@@ -61,7 +61,7 @@ class TraceRepoImpl @Inject constructor(
                 name = methodName,
                 beforeDurationInMs = (beforeMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong().notPresentIfMinusOne(),
                 afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong().notPresentIfMinusOne(),
-                diffInMs = diffInMs.roundToLong().notPresentIfMinusOne(),
+                diffInMs = diffInMs.roundToLong().toString(),
                 beforeCount = beforeCount,
                 afterCount = afterCount,
                 countComparison = """
@@ -81,11 +81,11 @@ class TraceRepoImpl @Inject constructor(
                     focusArea = focusArea,
                     before = afterThreadDetails,
                     compareWith = beforeThreadDetails
-                ).ifBlank { "not present" }
+                ).ifBlank { NOT_PRESENT }
 
             )
         }
-        return finalResult.entries.sortedByDescending { it.value.diffInMs }.associateBy({ it.key }, { it.value })
+        return finalResult.entries.sortedByDescending { it.value.diffInMs.toLong() }.associateBy({ it.key }, { it.value })
     }
 
 
