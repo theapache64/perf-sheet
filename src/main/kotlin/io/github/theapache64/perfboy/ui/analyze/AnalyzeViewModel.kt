@@ -25,7 +25,7 @@ class AnalyzeViewModel @Inject constructor(
     fun init() {
         val args = appRepo.args
         when (args?.size) {
-            null -> {
+            null, 0 -> {
                 _statusMsg.value = "Args missing. Try `perf-boy <before-trace> <after-trace>`"
             }
 

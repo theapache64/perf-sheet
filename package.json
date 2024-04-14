@@ -1,0 +1,25 @@
+{
+  "bin": {
+    "perf-boy": "jdeploy-bundle/jdeploy.js"
+  },
+  "author": "theapache64",
+  "description": "A CLI tool to analyse method trace files",
+  "main": "index.js",
+  "preferGlobal": true,
+  "repository": "https://github.com/theapache64/perf-boy",
+  "version": "0.0.1",
+  "jdeploy": {
+    "jar": "perf-boy.main.jar"
+  },
+  "dependencies": {
+    "shelljs": "0.8.4"
+  },
+  "license": "ISC",
+  "name": "perf-boy",
+  "files": [
+    "jdeploy-bundle"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class SplashViewModel @Inject constructor() {
     companion object {
-        private const val VERSION = "1.0.0-alpha01"
+        private const val VERSION = "0.0.1"
     }
 
     private val _welcomeMsg = MutableLiveData<String>()
