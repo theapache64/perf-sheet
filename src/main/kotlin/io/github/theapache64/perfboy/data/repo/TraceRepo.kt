@@ -102,29 +102,29 @@ class TraceRepoImpl @Inject constructor(
         compareWith: List<FinalResult.ThreadDetail>?
     ): String {
 
-        return before.joinToString(separator = "\n") { afterThread ->
+        return before.joinToString(separator = "\n") { beforeThread ->
             val threadName = if (focusArea != FocusArea.MAIN_THREAD_ONLY) {
-                "🧵 ${afterThread.threadName}, "
+                "🧵 ${beforeThread.threadName}, "
             } else {
                 ""
             }
             val summary =
-                "${threadName}⏱️${afterThread.totalDurationInMs.roundToLong()}ms, ⏹︎ (${afterThread.noOfBlocks} ${if (afterThread.noOfBlocks > 1) "blocks" else "block"})"
+                "${threadName}⏱️${beforeThread.totalDurationInMs.roundToLong()}ms, ⏹︎ (${beforeThread.noOfBlocks} ${if (beforeThread.noOfBlocks > 1) "blocks" else "block"})"
             if (compareWith == null) {
                 summary
             } else {
                 val beforeDuration =
-                    compareWith.find { beforeThread -> beforeThread.threadName == afterThread.threadName }?.totalDurationInMs?.roundToLong()
+                    compareWith.find { afterThread -> afterThread.threadName == beforeThread.threadName }?.totalDurationInMs?.roundToLong()
                         ?: 0
-                val afterDuration = afterThread.totalDurationInMs.roundToLong()
+                val afterDuration = beforeThread.totalDurationInMs.roundToLong()
                 val durationDiff = afterDuration - beforeDuration
                 // if negative '-' else +, if zero nothing
                 val sign = if (durationDiff > 0) "+" else ""
 
                 val beforeBlocks =
-                    compareWith.find { beforeThread -> beforeThread.threadName == afterThread.threadName }?.noOfBlocks
+                    compareWith.find { afterThread2 -> afterThread2.threadName == beforeThread.threadName }?.noOfBlocks
                         ?: 0
-                val afterBlocks = afterThread.noOfBlocks
+                val afterBlocks = beforeThread.noOfBlocks
                 val blocksDiff = afterBlocks - beforeBlocks
                 val blockSign = if (blocksDiff > 0) "+" else ""
 
