@@ -30,8 +30,8 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         AFTER_MS("After (ms)"),
         DIFF("Diff (ms)"),
         COUNT_DIFF("Count diff"),
-        BEFORE_THREAD("Before Thread"),
-        AFTER_THREAD("After Thread");
+        BEFORE_THREAD("Before summary"),
+        AFTER_THREAD("After summary");
     }
 
     override fun make(
@@ -77,7 +77,7 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                         Heading.BEFORE_MS -> 13
                         Heading.AFTER_MS -> 13
                         Heading.DIFF -> 12
-                        Heading.COUNT_DIFF -> 16
+                        Heading.COUNT_DIFF -> 18
                         Heading.BEFORE_THREAD -> 60
                         Heading.AFTER_THREAD -> 60
                     }
@@ -97,7 +97,7 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                 row.createCell(0).setCellValue(methodName)
                 row.createCell(1).setCellValue(result.beforeDurationInMs)
                 row.createCell(2).setCellValue(result.afterDurationInMs)
-                row.createCell(3).setCellValue(result.diffInMs)
+                row.createCell(3).setCellValue(result.diffInMs.toString())
                 row.createCell(4).setCellValue(result.countComparison)
                 row.createCell(5).setCellValue(result.beforeComparison)
                 row.createCell(6).setCellValue(result.afterComparison)

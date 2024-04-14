@@ -48,7 +48,7 @@ class TraceRepoImpl @Inject constructor(
         for (methodName in methodNames) {
             val beforeMethod = beforeMap[methodName]
             val afterMethod = afterMap[methodName]
-            val diffInMs = calculateCountDiff(beforeMethod, afterMethod)
+            val diffInMs = calculateDiff(beforeMethod, afterMethod)
 
             val beforeCount = beforeMethod?.nodes?.size ?: -1
             val afterCount = afterMethod?.nodes?.size ?: -1
@@ -61,7 +61,7 @@ class TraceRepoImpl @Inject constructor(
                 name = methodName,
                 beforeDurationInMs = (beforeMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong().notPresentIfMinusOne(),
                 afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong().notPresentIfMinusOne(),
-                diffInMs = diffInMs.roundToLong().toString(),
+                diffInMs = diffInMs,
                 beforeCount = beforeCount,
                 afterCount = afterCount,
                 countComparison = """
@@ -176,7 +176,7 @@ class TraceRepoImpl @Inject constructor(
         }
     }
 
-    private fun calculateCountDiff(beforeMethod: Method?, afterMethod: Method?): Double {
+    private fun calculateDiff(beforeMethod: Method?, afterMethod: Method?): Long {
         return when {
             beforeMethod != null && afterMethod != null -> {
                 afterMethod.nodes.sumOf {
@@ -194,8 +194,8 @@ class TraceRepoImpl @Inject constructor(
                 -beforeMethod.nodes.sumOf { it.durationInMs }
             }
 
-            else -> 0.0
-        }
+            else -> 0
+        }.toLong()
     }
 
     private fun AnalyzerResult.toMap(focusArea: FocusArea): Map<String, Method> {

@@ -4,7 +4,7 @@ data class FinalResult(
     val name: String,
     val beforeDurationInMs: String,
     val afterDurationInMs: String,
-    val diffInMs: String,
+    val diffInMs: Long,
     val beforeCount: Int,
     val afterCount: Int,
     val countComparison: String,
