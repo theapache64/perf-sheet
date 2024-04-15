@@ -1,5 +1,5 @@
 {
-  "bin": {"perf-sheet-main": "jdeploy-bundle/jdeploy.js"},
+  "bin": {"perf-sheet": "jdeploy-bundle/jdeploy.js"},
   "author": "theapache64",
   "description": "A tool that analyzes your method trace file and generates the analysis in a spreadsheet",
   "main": "index.js",
