@@ -1,17 +1,17 @@
 {
-  "bin": {"perf-boy-main": "jdeploy-bundle/jdeploy.js"},
+  "bin": {"perf-sheet-main": "jdeploy-bundle/jdeploy.js"},
   "author": "theapache64",
   "description": "A tool that analyzes your method trace file and generates the analysis in a spreadsheet",
   "main": "index.js",
   "preferGlobal": true,
-  "repository": "https://github.com/theapache64/perf-boy",
-  "version": "0.0.3",
+  "repository": "https://github.com/theapache64/perf-sheet",
+  "version": "0.0.4",
   "jdeploy": {
     "jdk": false,
     "javaVersion": "17",
-    "jar": "perf-boy.main.jar",
+    "jar": "perf-sheet.main.jar",
     "javafx": false,
-    "title": "perf-boy"
+    "title": "perf-sheet"
   },
   "dependencies": {
     "command-exists-promise": "^2.0.2",
@@ -21,7 +21,7 @@
     "shelljs": "^0.8.4"
   },
   "license": "ISC",
-  "name": "perf-boy",
+  "name": "perf-sheet",
   "files": ["jdeploy-bundle"],
   "scripts": {"test": "echo \"Error: no test specified\" && exit 1"}
 }

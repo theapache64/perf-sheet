@@ -1,6 +1,6 @@
-package io.github.theapache64.perfboy.data.repo
+package io.github.theapache64.perfsheet.data.repo
 
-import io.github.theapache64.perfboy.DaggerTestAppComponent
+import io.github.theapache64.perfsheet.DaggerTestAppComponent
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.io.File
@@ -23,8 +23,8 @@ class TraceRepoImplTest {
     @Test
     fun parseTest() {
 
-        val beforeTrace = File("/Users/theapache64/Desktop/perf-boy/before.trace")
-        val afterTrace = File("/Users/theapache64/Desktop/perf-boy/after.trace")
+        val beforeTrace = File("/Users/theapache64/Desktop/perf-sheet/before.trace")
+        val afterTrace = File("/Users/theapache64/Desktop/perf-sheet/after.trace")
 
         traceRepo.init(beforeTrace, afterTrace)
 
@@ -33,7 +33,7 @@ class TraceRepoImplTest {
         val backgroundThreadsOnly = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
 
         excelRepo.make(
-            File("/Users/theapache64/Desktop/perf-boy/perf-boy.xlsx"),
+            File("/Users/theapache64/Desktop/perf-sheet/perf-sheet.xlsx"),
             allThreadsResult,
             mainThreadOnly,
             backgroundThreadsOnly,

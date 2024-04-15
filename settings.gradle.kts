@@ -7,5 +7,5 @@ pluginManagement {
 
 }
 
-rootProject.name = "perf-boy"
+rootProject.name = "perf-sheet"
 include("trace-parser")

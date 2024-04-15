@@ -1,6 +1,6 @@
-package io.github.theapache64.perfboy.core
+package io.github.theapache64.perfsheet.core
 
-import io.github.theapache64.perfboy.traceparser.core.AppLogger
+import io.github.theapache64.perfsheet.traceparser.core.AppLogger
 import javax.inject.Inject
 import javax.inject.Singleton
 

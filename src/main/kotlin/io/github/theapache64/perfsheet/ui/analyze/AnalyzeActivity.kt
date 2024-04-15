@@ -1,8 +1,8 @@
-package io.github.theapache64.perfboy.ui.analyze
+package io.github.theapache64.perfsheet.ui.analyze
 
 import com.theapache64.cyclone.core.Activity
 import com.theapache64.cyclone.core.Intent
-import io.github.theapache64.perfboy.app.App
+import io.github.theapache64.perfsheet.app.App
 import javax.inject.Inject
 
 class AnalyzeActivity : Activity() {

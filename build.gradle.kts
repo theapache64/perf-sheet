@@ -4,7 +4,7 @@ plugins {
     application
 }
 
-group = "io.github.theapache64.perfboy"
+group = "io.github.theapache64.perfsheet"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -54,5 +54,5 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
 }
 
 application {
-    mainClass.set("io.github.theapache64.perfboy.app.AppKt")
+    mainClass.set("io.github.theapache64.perfsheet.app.AppKt")
 }

@@ -1,11 +1,11 @@
-package io.github.theapache64.perfboy.ui.analyze
+package io.github.theapache64.perfsheet.ui.analyze
 
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
-import io.github.theapache64.perfboy.data.repo.AppRepo
-import io.github.theapache64.perfboy.data.repo.ExcelRepo
-import io.github.theapache64.perfboy.data.repo.FocusArea
-import io.github.theapache64.perfboy.data.repo.TraceRepo
+import io.github.theapache64.perfsheet.data.repo.AppRepo
+import io.github.theapache64.perfsheet.data.repo.ExcelRepo
+import io.github.theapache64.perfsheet.data.repo.FocusArea
+import io.github.theapache64.perfsheet.data.repo.TraceRepo
 import java.io.File
 import javax.inject.Inject
 
@@ -26,13 +26,13 @@ class AnalyzeViewModel @Inject constructor(
         val args = appRepo.args
         when (args?.size) {
             null, 0 -> {
-                _statusMsg.value = "Args missing. Try `perf-boy <before-trace> <after-trace>`"
+                _statusMsg.value = "Args missing. Try `perf-sheet <before-trace> <after-trace>`"
             }
 
             1 -> {
                 _statusMsg.value = """
                     Single trace file analysis is not implemented yet. 
-                    Please vote : https://github.com/theapache64/perf-boy/issues/1
+                    Please vote : https://github.com/theapache64/perf-sheet/issues/1
                 """.trimIndent()
             }
 

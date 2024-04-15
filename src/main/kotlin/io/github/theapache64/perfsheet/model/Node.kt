@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.model
+package io.github.theapache64.perfsheet.model
 
 data class Node(
     val threadName: String,

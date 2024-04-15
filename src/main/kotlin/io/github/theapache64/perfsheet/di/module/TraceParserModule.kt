@@ -1,10 +1,10 @@
-package io.github.theapache64.perfboy.di.module
+package io.github.theapache64.perfsheet.di.module
 
 import dagger.Module
 import dagger.Provides
-import io.github.theapache64.perfboy.core.TraceLogger
-import io.github.theapache64.perfboy.traceparser.analyzer.TraceAnalyzer
-import io.github.theapache64.perfboy.traceparser.core.AppLogger
+import io.github.theapache64.perfsheet.core.TraceLogger
+import io.github.theapache64.perfsheet.traceparser.analyzer.TraceAnalyzer
+import io.github.theapache64.perfsheet.traceparser.core.AppLogger
 import javax.inject.Singleton
 
 @Module

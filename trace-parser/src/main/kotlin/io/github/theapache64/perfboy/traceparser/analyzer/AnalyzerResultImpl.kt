@@ -1,7 +1,7 @@
-package io.github.theapache64.perfboy.traceparser.analyzer
+package io.github.theapache64.perfsheet.traceparser.analyzer
 
-import io.github.theapache64.perfboy.traceparser.core.AnalyzerResult
-import io.github.theapache64.perfboy.traceparser.core.ProfileData
+import io.github.theapache64.perfsheet.traceparser.core.AnalyzerResult
+import io.github.theapache64.perfsheet.traceparser.core.ProfileData
 import kotlin.math.max
 
 data class AnalyzerResultImpl(

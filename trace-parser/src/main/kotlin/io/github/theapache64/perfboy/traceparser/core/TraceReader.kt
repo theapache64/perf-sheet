@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.traceparser.core
+package io.github.theapache64.perfsheet.traceparser.core
 
 import java.io.File
 

@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.data.repo
+package io.github.theapache64.perfsheet.data.repo
 
 import javax.inject.Inject
 import javax.inject.Singleton

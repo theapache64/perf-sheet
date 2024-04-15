@@ -1,9 +1,9 @@
-package io.github.theapache64.perfboy.app
+package io.github.theapache64.perfsheet.app
 
 import com.theapache64.cyclone.core.Application
-import io.github.theapache64.perfboy.di.AppComponent
-import io.github.theapache64.perfboy.di.DaggerAppComponent
-import io.github.theapache64.perfboy.ui.splash.SplashActivity
+import io.github.theapache64.perfsheet.di.AppComponent
+import io.github.theapache64.perfsheet.di.DaggerAppComponent
+import io.github.theapache64.perfsheet.ui.splash.SplashActivity
 import javax.inject.Inject
 
 

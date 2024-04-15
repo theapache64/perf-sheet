@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.traceparser.analyzer.converter
+package io.github.theapache64.perfsheet.traceparser.analyzer.converter
 
 /**
  * Converts class names and class methods names.

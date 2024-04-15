@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.traceparser.analyzer
+package io.github.theapache64.perfsheet.traceparser.analyzer
 
 data class MethodData(
     val fullName: String,

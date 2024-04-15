@@ -1,6 +1,6 @@
-package io.github.theapache64.perfboy.data.repo
+package io.github.theapache64.perfsheet.data.repo
 
-import io.github.theapache64.perfboy.model.FinalResult
+import io.github.theapache64.perfsheet.model.FinalResult
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import javax.inject.Inject

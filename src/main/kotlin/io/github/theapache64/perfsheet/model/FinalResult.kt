@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.model
+package io.github.theapache64.perfsheet.model
 
 data class FinalResult(
     val name: String,

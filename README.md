@@ -1,8 +1,8 @@
 ![](cover.jpeg)
 
-# 🧑‍🎤 perf-boy [WIP]
+# 🧑‍🎤 perf-sheet [WIP]
 
-![latestVersion](https://img.shields.io/github/v/release/theapache64/perf-boy)
+![latestVersion](https://img.shields.io/github/v/release/theapache64/perf-sheet)
 <a href="https://twitter.com/theapache64" target="_blank">
 <img alt="Twitter: theapache64" src="https://img.shields.io/twitter/follow/theapache64.svg?style=social" />
 </a>
@@ -14,13 +14,13 @@ Finding performance regression in your app is tough. This tool helps you identif
 ### ✨ Installation
 
 ```bash
-sudo npm install -g perf-boy 
+sudo npm install -g perf-sheet 
 ```
 
 ### 📦 Usage
 
 ```bash
-perf-boy before.trace after.trace
+perf-sheet before.trace after.trace
 ```
 
 ## 🚀 Demo
@@ -29,8 +29,8 @@ perf-boy before.trace after.trace
 ```bash                                                              ✘ INT
 ❯ ls
 after.trace  before.trace
-❯ perf-boy before.trace after.trace
-perf-boy (0.0.2)
+❯ perf-sheet before.trace after.trace
+perf-sheet (0.0.2)
 📖 Parsing traces... (this step may take a while)
 🔍 Comparing traces...
 📝 Writing to spreadsheet (before-vs-after.xlsx)...
@@ -48,7 +48,7 @@ after.trace before-vs-after.xlsx before.trace
 
 **Output**
 
-![image](https://github.com/theapache64/perf-boy/assets/9678279/a502962a-0e47-4dbb-b664-33a2ac169414)
+![image](https://github.com/theapache64/perf-sheet/assets/9678279/a502962a-0e47-4dbb-b664-33a2ac169414)
 
 ## ✍️ Author
 

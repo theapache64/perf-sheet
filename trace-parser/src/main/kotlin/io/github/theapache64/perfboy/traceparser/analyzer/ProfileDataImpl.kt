@@ -1,6 +1,6 @@
-package io.github.theapache64.perfboy.traceparser.analyzer
+package io.github.theapache64.perfsheet.traceparser.analyzer
 
-import io.github.theapache64.perfboy.traceparser.core.ProfileData
+import io.github.theapache64.perfsheet.traceparser.core.ProfileData
 
 data class ProfileDataImpl(
     override val name: String,

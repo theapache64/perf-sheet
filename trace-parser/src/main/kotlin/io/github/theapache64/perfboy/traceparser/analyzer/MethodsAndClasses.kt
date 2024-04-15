@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.traceparser.analyzer
+package io.github.theapache64.perfsheet.traceparser.analyzer
 
 class MethodsAndClasses {
     private val emptyData = MethodData("", "", "")

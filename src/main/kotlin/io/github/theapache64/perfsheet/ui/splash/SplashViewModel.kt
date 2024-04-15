@@ -1,4 +1,4 @@
-package io.github.theapache64.perfboy.ui.splash
+package io.github.theapache64.perfsheet.ui.splash
 
 import com.theapache64.cyclone.core.livedata.LiveData
 import com.theapache64.cyclone.core.livedata.MutableLiveData
@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 class SplashViewModel @Inject constructor() {
     companion object {
-        private const val VERSION = "0.0.3"
+        private const val VERSION = "0.0.4"
     }
 
     private val _welcomeMsg = MutableLiveData<String>()
@@ -16,7 +16,7 @@ class SplashViewModel @Inject constructor() {
     val goToHome: LiveData<String> = _goToHome
 
     init {
-        val splashMsg = "perf-boy ($VERSION)"
+        val splashMsg = "perf-sheet ($VERSION)"
         _welcomeMsg.value = splashMsg
         _goToHome.value = splashMsg
     }

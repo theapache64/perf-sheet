@@ -1,6 +1,6 @@
-package io.github.theapache64.perfboy.app
+package io.github.theapache64.perfsheet.app
 
-import io.github.theapache64.perfboy.data.repo.AppRepo
+import io.github.theapache64.perfsheet.data.repo.AppRepo
 import javax.inject.Inject
 import javax.inject.Singleton
 

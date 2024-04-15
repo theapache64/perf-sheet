@@ -1,9 +1,9 @@
-package io.github.theapache64.perfboy.ui.analyze
+package io.github.theapache64.perfsheet.ui.analyze
 
-import io.github.theapache64.perfboy.DaggerTestAppComponent
-import io.github.theapache64.perfboy.data.repo.AppRepo
-import io.github.theapache64.perfboy.data.repo.ExcelRepo
-import io.github.theapache64.perfboy.data.repo.TraceRepo
+import io.github.theapache64.perfsheet.DaggerTestAppComponent
+import io.github.theapache64.perfsheet.data.repo.AppRepo
+import io.github.theapache64.perfsheet.data.repo.ExcelRepo
+import io.github.theapache64.perfsheet.data.repo.TraceRepo
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -29,8 +29,8 @@ class AnalyzeViewModelTest {
 
         val fakeAppRepo = mockk<AppRepo>()
         every { fakeAppRepo.args } returns listOf(
-            "/Users/theapache64/Desktop/perf-boy/before.trace", // TODO: add some other traces to repo
-            "/Users/theapache64/Desktop/perf-boy/after.trace"
+            "/Users/theapache64/Desktop/perf-sheet/before.trace", // TODO: add some other traces to repo
+            "/Users/theapache64/Desktop/perf-sheet/after.trace"
         )
         analyzeViewModel = AnalyzeViewModel(fakeAppRepo, traceRepo, excelRepo)
     }

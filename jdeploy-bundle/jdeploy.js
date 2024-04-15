@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 
-var jarName = "perf-boy.main.jar";
+var jarName = "perf-sheet.main.jar";
 var mainClass = "{{MAIN_CLASS}}";
 var classPath = "{{CLASSPATH}}";
 var port = "0";

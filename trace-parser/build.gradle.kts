@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm")
 }
 
-group = "io.github.theapache64.perfboy"
+group = "io.github.theapache64.perfsheet"
 version = "1.0-SNAPSHOT"
 
 repositories {
