@@ -1,6 +1,6 @@
 package io.github.theapache64.perfsheet.data.repo
 
-import io.github.theapache64.perfsheet.model.FinalResult
+import io.github.theapache64.perfsheet.model.ResultRow
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import javax.inject.Inject
@@ -8,9 +8,10 @@ import javax.inject.Inject
 interface ExcelRepo {
     fun make(
         xlsFile: File,
-        allThreadData: Map<String, FinalResult>,
-        mainThreadData: Map<String, FinalResult>,
-        backgroundThreadData: Map<String, FinalResult>,
+        allThreadData: Map<String, ResultRow>,
+        mainThreadData: Map<String, ResultRow>,
+        backgroundThreadData: Map<String, ResultRow>,
+        allThreadDataMinified: Map<String, ResultRow>,
         onProgress: (String) -> Unit,
     )
 }
@@ -21,7 +22,8 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
     enum class SheetTypes(val title: String) {
         ALL_THREADS("All Threads"),
         MAIN_THREAD("Main Thread"),
-        BACKGROUND_THREADS("Background Threads")
+        BACKGROUND_THREADS("Background Threads"),
+        ALL_THREADS_MINIFIED("All Threads (minified)")
     }
 
     enum class Heading(val title: String) {
@@ -36,15 +38,17 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
 
     override fun make(
         xlsFile: File,
-        allThreadData: Map<String, FinalResult>,
-        mainThreadData: Map<String, FinalResult>,
-        backgroundThreadData: Map<String, FinalResult>,
+        allThreadData: Map<String, ResultRow>,
+        mainThreadData: Map<String, ResultRow>,
+        backgroundThreadData: Map<String, ResultRow>,
+        allThreadDataMinified: Map<String, ResultRow>,
         onProgress: (String) -> Unit,
     ) {
-        val sheetMap = mapOf<SheetTypes, Map<String, FinalResult>>(
+        val sheetMap = mapOf(
             SheetTypes.ALL_THREADS to allThreadData,
             SheetTypes.MAIN_THREAD to mainThreadData,
-            SheetTypes.BACKGROUND_THREADS to backgroundThreadData
+            SheetTypes.BACKGROUND_THREADS to backgroundThreadData,
+            SheetTypes.ALL_THREADS_MINIFIED to allThreadDataMinified
         )
 
 
@@ -108,7 +112,6 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         workbook.write(xlsFile.outputStream())
         workbook.close()
     }
-
-
 }
+
 

@@ -26,9 +26,12 @@ class TraceRepoImplTest {
         val beforeTrace = File("/Users/theapache64/Desktop/perf-sheet/before.trace")
         val afterTrace = File("/Users/theapache64/Desktop/perf-sheet/after.trace")
 
-        traceRepo.init(beforeTrace, afterTrace)
+        traceRepo.init(beforeTrace, afterTrace) {
+            println("QuickTag: TraceRepoImplTest:parseTest: $it")
+        }
 
         val allThreadsResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS)
+        val allThreadsMinifiedResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS_MINIFIED)
         val mainThreadOnly = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
         val backgroundThreadsOnly = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
 
@@ -37,6 +40,7 @@ class TraceRepoImplTest {
             allThreadsResult,
             mainThreadOnly,
             backgroundThreadsOnly,
+            allThreadsMinifiedResult,
             onProgress = {
                 println(it)
             }

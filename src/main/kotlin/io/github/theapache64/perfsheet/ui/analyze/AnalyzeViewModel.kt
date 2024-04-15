@@ -50,25 +50,30 @@ class AnalyzeViewModel @Inject constructor(
     }
 
     private fun analyzeAndCompare(beforeTrace: File, afterTrace: File) {
+        val onProgress: (String) -> Unit = {
+            _statusMsg.value = it
+        }
+
         _statusMsg.value = "📖 Parsing traces... (this step may take a while)"
-        traceRepo.init(beforeTrace, afterTrace)
+        traceRepo.init(beforeTrace, afterTrace, onProgress)
         _statusMsg.value = "🔍 Comparing traces..."
 
         val allThreadsResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS)
         val mainThreadOnly = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
         val backgroundThreadsOnly = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
+        val allThreadsMinifiedResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS_MINIFIED)
 
         val excelFileName = "${beforeTrace.nameWithoutExtension}-vs-${afterTrace.nameWithoutExtension}.xlsx"
         val excelFile = File(beforeTrace.parent, excelFileName)
         _statusMsg.value = "📝 Writing to spreadsheet (${excelFile.name})... "
+
         excelRepo.make(
             excelFile,
             allThreadsResult,
             mainThreadOnly,
             backgroundThreadsOnly,
-            onProgress = {
-                _statusMsg.value = it
-            }
+            allThreadsMinifiedResult,
+            onProgress = onProgress
         )
     }
 }

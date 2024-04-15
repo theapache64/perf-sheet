@@ -1,8 +1,12 @@
 package io.github.theapache64.perfsheet.data.repo
 
-import io.github.theapache64.perfsheet.model.FinalResult
+import io.github.theapache64.perfsheet.core.filter.AnonFilter
+import io.github.theapache64.perfsheet.core.filter.FrameworkCallsFilter
+import io.github.theapache64.perfsheet.core.filter.LastHyphenFilter
+import io.github.theapache64.perfsheet.core.filter.LineNoFilter
 import io.github.theapache64.perfsheet.model.Method
 import io.github.theapache64.perfsheet.model.Node
+import io.github.theapache64.perfsheet.model.ResultRow
 import io.github.theapache64.perfsheet.traceparser.analyzer.AnalyzerResultImpl
 import io.github.theapache64.perfsheet.traceparser.analyzer.TraceAnalyzer
 import io.github.theapache64.perfsheet.traceparser.core.AnalyzerResult
@@ -13,34 +17,43 @@ import kotlin.math.roundToLong
 enum class FocusArea {
     ALL_THREADS,
     MAIN_THREAD_ONLY,
-    BACKGROUND_THREADS_ONLY
+    BACKGROUND_THREADS_ONLY,
+    ALL_THREADS_MINIFIED
 }
 
 interface TraceRepo {
-    fun init(beforeTrace: File, afterTrace: File)
-    fun parse(focusArea: FocusArea): Map<String, FinalResult>
+    fun init(beforeTrace: File, afterTrace: File, onProgress: (String) -> Unit)
+    fun parse(focusArea: FocusArea): Map<String, ResultRow>
 }
 
 class TraceRepoImpl @Inject constructor(
     private val traceAnalyzer: TraceAnalyzer
 ) : TraceRepo {
 
-    companion object{
+    companion object {
         private const val NOT_PRESENT = "not present"
+        private val FILTERS = listOf(
+            FrameworkCallsFilter(),
+            AnonFilter(),
+            LastHyphenFilter(),
+            LineNoFilter(),
+        )
     }
 
     private lateinit var beforeAnalysisResult: AnalyzerResultImpl
     private lateinit var afterAnalysisResult: AnalyzerResultImpl
+    private lateinit var onProgress: (String) -> Unit
 
-    override fun init(beforeTrace: File, afterTrace: File) {
+    override fun init(beforeTrace: File, afterTrace: File, onProgress: (String) -> Unit) {
         this.beforeAnalysisResult = traceAnalyzer.analyze(beforeTrace)
         this.afterAnalysisResult = traceAnalyzer.analyze(afterTrace)
+        this.onProgress = onProgress
     }
 
     override fun parse(
         focusArea: FocusArea,
-    ): Map<String, FinalResult> {
-        val finalResult = mutableMapOf<String, FinalResult>()
+    ): Map<String, ResultRow> {
+        val resultRow = mutableMapOf<String, ResultRow>()
         val beforeMap = beforeAnalysisResult.toMap(focusArea)
         val afterMap = afterAnalysisResult.toMap(focusArea)
 
@@ -57,7 +70,7 @@ class TraceRepoImpl @Inject constructor(
             val beforeThreadDetails = calculateThreadDetails(beforeMethod)
             val afterThreadDetails = calculateThreadDetails(afterMethod)
 
-            finalResult[methodName] = FinalResult(
+            resultRow[methodName] = ResultRow(
                 name = methodName,
                 beforeDurationInMs = (beforeMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
                 afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
@@ -85,10 +98,8 @@ class TraceRepoImpl @Inject constructor(
 
             )
         }
-        return finalResult.entries.sortedByDescending { it.value.diffInMs.toLong() }.associateBy({ it.key }, { it.value })
+        return resultRow.entries.sortedByDescending { it.value.diffInMs }.associateBy({ it.key }, { it.value })
     }
-
-
 
 
     private fun Long.notPresentIfMinusOne(): String {
@@ -98,8 +109,8 @@ class TraceRepoImpl @Inject constructor(
 
     private fun summarise(
         focusArea: FocusArea,
-        before: List<FinalResult.ThreadDetail>,
-        compareWith: List<FinalResult.ThreadDetail>?
+        before: List<ResultRow.ThreadDetail>,
+        compareWith: List<ResultRow.ThreadDetail>?
     ): String {
 
         return before.joinToString(separator = "\n") { beforeThread ->
@@ -138,13 +149,13 @@ class TraceRepoImpl @Inject constructor(
         }
     }
 
-    private fun calculateThreadDetails(beforeMethod: Method?): List<FinalResult.ThreadDetail> {
-        val threadDetails = mutableListOf<FinalResult.ThreadDetail>()
+    private fun calculateThreadDetails(beforeMethod: Method?): List<ResultRow.ThreadDetail> {
+        val threadDetails = mutableListOf<ResultRow.ThreadDetail>()
         for (threadNode in beforeMethod?.nodes ?: emptyList()) {
             var threadDetail = threadDetails.find { it.threadName == threadNode.threadName }
             if (threadDetail == null) {
                 // first detail node
-                threadDetail = FinalResult.ThreadDetail(threadNode.threadName, noOfBlocks = 0, 0.0)
+                threadDetail = ResultRow.ThreadDetail(threadNode.threadName, noOfBlocks = 0, 0.0)
                 threadDetails.add(threadDetail)
             }
             threadDetail.noOfBlocks++
@@ -206,13 +217,13 @@ class TraceRepoImpl @Inject constructor(
             when (focusArea) {
                 FocusArea.MAIN_THREAD_ONLY -> if (thread.threadId != mainThreadId) continue
                 FocusArea.BACKGROUND_THREADS_ONLY -> if (thread.threadId == mainThreadId) continue
-                FocusArea.ALL_THREADS -> {
+                FocusArea.ALL_THREADS, FocusArea.ALL_THREADS_MINIFIED -> {
                     // all threads pls
                 }
             }
 
             for (method in allMethods) {
-                val methodName = method.name
+                val methodName = method.name.applyFilters(focusArea) ?: continue
                 val traceMethod = resultMap.getOrPut(
                     methodName
                 ) {
@@ -234,4 +245,21 @@ class TraceRepoImpl @Inject constructor(
 
         return resultMap
     }
+
+
+    private fun String.applyFilters(
+        focusArea: FocusArea
+    ): String? {
+        if (focusArea != FocusArea.ALL_THREADS_MINIFIED) {
+            return this
+        }
+        var methodName: String? = this
+        for (filter in FILTERS) {
+            if (methodName == null) return null
+            methodName = filter.apply(methodName)
+        }
+        return methodName
+    }
 }
+
+

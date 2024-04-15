@@ -1,6 +1,6 @@
 package io.github.theapache64.perfsheet.model
 
-data class FinalResult(
+data class ResultRow(
     val name: String,
     val beforeDurationInMs: Long,
     val afterDurationInMs: Long,
