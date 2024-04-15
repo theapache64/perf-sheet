@@ -2,13 +2,14 @@
 
 # 🧑‍🎤 perf-boy [WIP]
 
-![buildStatus](https://img.shields.io/github/workflow/status/theapache64/perf-boy/Java%20CI%20with%20Gradle?style=plastic)
 ![latestVersion](https://img.shields.io/github/v/release/theapache64/perf-boy)
 <a href="https://twitter.com/theapache64" target="_blank">
 <img alt="Twitter: theapache64" src="https://img.shields.io/twitter/follow/theapache64.svg?style=social" />
 </a>
 
 > A tool that analyzes your method trace file and generates the analysis in a spreadsheet
+
+Finding performance regression in your app is tough. This tool helps you identify the most time-consuming tasks in your trace and shows how they were performing previously and how they are performing currently. 
 
 ### ✨ Installation
 
@@ -47,9 +48,7 @@ after.trace before-vs-after.xlsx before.trace
 
 **Output**
 
-![image](https://github.com/theapache64/perf-boy/assets/9678279/99ebdcfc-1271-4be3-b563-a960b75f2294)
-
-
+![image](https://github.com/theapache64/perf-boy/assets/9678279/a502962a-0e47-4dbb-b664-33a2ac169414)
 
 ## ✍️ Author
 
