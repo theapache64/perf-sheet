@@ -29,7 +29,14 @@ class FrameworkCallsFilter : Filter() {
         private val specialSystemCallsRegex = listOf(
             "android.app.ActivityThread.handleBindApplication",
             "android.app.ActivityThread.installContentProviders",
-        ).joinToString(separator = "|", prefix = "^(", postfix = ").*").toRegex()
+            "android.app.Activity.perform", // this will match onCreate, onStart, onResume, etc
+            "androidx.lifecycle.ViewModelProvider.get", // viewModel query time
+
+        ).joinToString(separator = "|", prefix = "^(", postfix = ").*")
+            .also {
+                println("QuickTag: FrameworkCallsFilter:'$it': ")
+            }
+            .toRegex()
     }
 
     override fun apply(methodName : String): String? {
