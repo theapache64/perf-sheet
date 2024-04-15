@@ -1,7 +1,5 @@
 package io.github.theapache64.perfsheet.core.filter
 
-import io.github.theapache64.perfsheet.model.Method
-
 class FrameworkCallsFilter : Filter() {
     companion object {
         private val systemCallsRegex = listOf(
@@ -29,11 +27,18 @@ class FrameworkCallsFilter : Filter() {
         private val specialSystemCallsRegex = listOf(
             "android.app.ActivityThread.handleBindApplication",
             "android.app.ActivityThread.installContentProviders",
-        ).joinToString(separator = "|", prefix = "^(", postfix = ").*").toRegex()
+            "android.app.Activity.perform", // this will match onCreate, onStart, onResume, etc
+            "androidx.lifecycle.ViewModelProvider.get", // viewModel query time
+
+        ).joinToString(separator = "|", prefix = "^(", postfix = ").*")
+            .also {
+                println("QuickTag: FrameworkCallsFilter:'$it': ")
+            }
+            .toRegex()
     }
 
-    override fun apply(methodName : String): String? {
+    override fun apply(methodName: String): String? {
         val isMatched = systemCallsRegex.matches(methodName) && !specialSystemCallsRegex.matches(methodName)
-        return if(isMatched) null else methodName
+        return if (isMatched) null else methodName
     }
 }

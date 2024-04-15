@@ -1,7 +1,6 @@
 package io.github.theapache64.perfsheet.core.filter
-import io.github.theapache64.perfsheet.model.Method
 
-class LastHyphenFilter: Filter() {
+class LastHyphenFilter : Filter() {
     override fun apply(methodName: String): String {
         return removeLastHyphen(methodName)
     }
