@@ -30,9 +30,6 @@ class FrameworkCallsFilter : Filter() {
             "android.app.Activity.perform", // this will match onCreate, onStart, onResume, etc
             "androidx.lifecycle.ViewModelProvider.get", // viewModel query time
         ).joinToString(separator = "|", prefix = "^(", postfix = ").*")
-            .also {
-                println("QuickTag: FrameworkCallsFilter:'$it': ")
-            }
             .toRegex()
     }
 

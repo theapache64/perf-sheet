@@ -49,6 +49,7 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         allThreadDataMinified: Map<String, ResultRow>,
         onProgress: (String) -> Unit,
     ) {
+        xlsFile.delete()
         val sheetMap = mapOf(
             SheetTypes.ALL_THREADS to allThreadData,
             SheetTypes.MAIN_THREAD to mainThreadData,
@@ -93,6 +94,9 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
             // Data
             for ((methodName, result) in sheetData) {
                 val row = sheet.createRow(sheet.lastRowNum + 1)
+                // set row height to 22pt
+                row.heightInPoints = 22f
+
                 row.createCell(0).setCellValue(methodName)
                 row.createCell(1).setCellValue(result.beforeDurationInMs.toDouble())
                 row.createCell(2).setCellValue(result.afterDurationInMs.toDouble())
