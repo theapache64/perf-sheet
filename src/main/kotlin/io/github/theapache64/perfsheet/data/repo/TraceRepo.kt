@@ -77,12 +77,7 @@ class TraceRepoImpl @Inject constructor(
                 diffInMs = diffInMs,
                 beforeCount = beforeCount,
                 afterCount = afterCount,
-                countComparison = """
-                    Before: ${beforeCount.takeIf { it >= 1 } ?: NOT_PRESENT}
-                    After: ${afterCount.takeIf { it >= 1 } ?: NOT_PRESENT}
-                    
-                    $countLabel
-                """.trimIndent(),
+                countComparison = countLabel,
                 beforeThreadDetails = beforeThreadDetails,
                 afterThreadDetails = afterThreadDetails,
                 beforeComparison = summarise(
@@ -172,16 +167,16 @@ class TraceRepoImpl @Inject constructor(
         }
     }
 
-    private fun calculateCountLabel(beforeCount: Int, afterCount: Int): String {
+    private fun calculateCountLabel(beforeCount: Int, afterCount: Int): Int {
         return when {
-            beforeCount == afterCount -> "0"
-            beforeCount > 0 && afterCount == -1 -> "Removed ($beforeCount)"
-            beforeCount == -1 && afterCount > 0 -> "Added ($afterCount)"
+            beforeCount == afterCount -> 0
+            beforeCount > 0 && afterCount == -1 -> -beforeCount
+            beforeCount == -1 && afterCount > 0 -> afterCount
             else -> {
                 val diff = (afterCount - beforeCount)
                 when {
-                    diff > 0 -> "$diff (added)"
-                    else -> "$diff (removed)"
+                    diff > 0 -> diff
+                    else -> diff
                 }
             }
         }

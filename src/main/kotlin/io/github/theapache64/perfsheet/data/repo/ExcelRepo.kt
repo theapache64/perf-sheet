@@ -26,14 +26,19 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         ALL_THREADS_MINIFIED("All Threads (minified)")
     }
 
-    enum class Heading(val title: String) {
-        METHOD_NAME("Method Name"),
-        BEFORE_MS("Before (ms)"),
-        AFTER_MS("After (ms)"),
-        DIFF("Diff (ms)"),
-        COUNT_DIFF("Count diff"),
-        BEFORE_THREAD("Before summary"),
-        AFTER_THREAD("After summary");
+    enum class Heading(
+        val title: String,
+        val colWidth : Int
+    ) {
+        METHOD_NAME("Method Name", 60),
+        BEFORE_MS("Before (ms)", 13),
+        AFTER_MS("After (ms)", 13),
+        DIFF("Diff (ms)", 12),
+        BEFORE_COUNT("Before count", 13),
+        AFTER_COUNT("After count", 13),
+        COUNT_DIFF("Count diff", 18),
+        BEFORE_THREAD("Before summary", 60),
+        AFTER_THREAD("After summary", 60);
     }
 
     override fun make(
@@ -76,17 +81,7 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                 headerRow.createCell(index).apply {
                     setCellValue(heading.title)
                     cellStyle = headerStyle
-                    val width = when (heading) {
-                        Heading.METHOD_NAME -> 60
-                        Heading.BEFORE_MS -> 13
-                        Heading.AFTER_MS -> 13
-                        Heading.DIFF -> 12
-                        Heading.COUNT_DIFF -> 18
-                        Heading.BEFORE_THREAD -> 60
-                        Heading.AFTER_THREAD -> 60
-                    }
-
-                    sheet.setColumnWidth(index, width * 256)
+                    sheet.setColumnWidth(index, heading.colWidth * 256)
                 }
             }
 
@@ -102,9 +97,11 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                 row.createCell(1).setCellValue(result.beforeDurationInMs.toDouble())
                 row.createCell(2).setCellValue(result.afterDurationInMs.toDouble())
                 row.createCell(3).setCellValue(result.diffInMs.toDouble())
-                row.createCell(4).setCellValue(result.countComparison)
-                row.createCell(5).setCellValue(result.beforeComparison)
-                row.createCell(6).setCellValue(result.afterComparison)
+                row.createCell(4).setCellValue(result.beforeCount.toDouble())
+                row.createCell(5).setCellValue(result.afterCount.toDouble())
+                row.createCell(6).setCellValue(result.countComparison.toDouble())
+                row.createCell(7).setCellValue(result.beforeComparison)
+                row.createCell(8).setCellValue(result.afterComparison)
             }
         }
 

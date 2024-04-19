@@ -7,7 +7,7 @@ data class ResultRow(
     val diffInMs: Long,
     val beforeCount: Int,
     val afterCount: Int,
-    val countComparison: String,
+    val countComparison: Int,
     val beforeThreadDetails: List<ThreadDetail>,
     val afterThreadDetails: List<ThreadDetail>,
     var beforeComparison: String?,
