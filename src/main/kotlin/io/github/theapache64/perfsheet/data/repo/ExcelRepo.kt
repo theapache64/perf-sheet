@@ -12,6 +12,7 @@ interface ExcelRepo {
         mainThreadData: Map<String, ResultRow>,
         backgroundThreadData: Map<String, ResultRow>,
         allThreadDataMinified: Map<String, ResultRow>,
+        mainThreadMinified: Map<String, ResultRow>,
         onProgress: (String) -> Unit,
     )
 }
@@ -23,7 +24,8 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         ALL_THREADS("All Threads"),
         MAIN_THREAD("Main Thread"),
         BACKGROUND_THREADS("Background Threads"),
-        ALL_THREADS_MINIFIED("All Threads (minified)")
+        ALL_THREADS_MINIFIED("All Threads (minified)"),
+        MAIN_THREAD_MINIFIED("Main Thread (minified)"),
     }
 
     enum class Heading(
@@ -47,6 +49,7 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         mainThreadData: Map<String, ResultRow>,
         backgroundThreadData: Map<String, ResultRow>,
         allThreadDataMinified: Map<String, ResultRow>,
+        mainThreadMinified: Map<String, ResultRow>,
         onProgress: (String) -> Unit,
     ) {
         xlsFile.delete()
@@ -54,7 +57,9 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
             SheetTypes.ALL_THREADS to allThreadData,
             SheetTypes.MAIN_THREAD to mainThreadData,
             SheetTypes.BACKGROUND_THREADS to backgroundThreadData,
-            SheetTypes.ALL_THREADS_MINIFIED to allThreadDataMinified
+            SheetTypes.ALL_THREADS_MINIFIED to allThreadDataMinified,
+            SheetTypes.MAIN_THREAD_MINIFIED to mainThreadMinified,
+
         )
 
 

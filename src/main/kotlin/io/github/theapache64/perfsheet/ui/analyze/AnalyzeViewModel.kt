@@ -58,10 +58,11 @@ class AnalyzeViewModel @Inject constructor(
         traceRepo.init(beforeTrace, afterTrace, onProgress)
         _statusMsg.value = "🔍 Comparing traces..."
 
-        val allThreadsResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS)
-        val mainThreadOnly = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
-        val backgroundThreadsOnly = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
-        val allThreadsMinifiedResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS_MINIFIED)
+        val allThreads = traceRepo.parse(focusArea = FocusArea.ALL_THREADS)
+        val mainThread = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
+        val backgroundThreads = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
+        val allThreadsMinified = traceRepo.parse(focusArea = FocusArea.ALL_THREADS_MINIFIED)
+        val mainThreadMinified = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_MINIFIED)
 
         val excelFileName = "${beforeTrace.nameWithoutExtension}-vs-${afterTrace.nameWithoutExtension}.xlsx"
         val excelFile = File(beforeTrace.parent, excelFileName)
@@ -69,10 +70,11 @@ class AnalyzeViewModel @Inject constructor(
 
         excelRepo.make(
             excelFile,
-            allThreadsResult,
-            mainThreadOnly,
-            backgroundThreadsOnly,
-            allThreadsMinifiedResult,
+            allThreads,
+            mainThread,
+            backgroundThreads,
+            allThreadsMinified,
+            mainThreadMinified,
             onProgress = onProgress
         )
     }

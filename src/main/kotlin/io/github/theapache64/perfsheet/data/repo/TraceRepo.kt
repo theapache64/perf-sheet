@@ -18,7 +18,8 @@ enum class FocusArea {
     ALL_THREADS,
     MAIN_THREAD_ONLY,
     BACKGROUND_THREADS_ONLY,
-    ALL_THREADS_MINIFIED
+    ALL_THREADS_MINIFIED,
+    MAIN_THREAD_MINIFIED
 }
 
 interface TraceRepo {
@@ -210,7 +211,7 @@ class TraceRepoImpl @Inject constructor(
             val thread = this.threads.find { it.threadId == threadId } ?: error("Thread not found: '$threadId'")
 
             when (focusArea) {
-                FocusArea.MAIN_THREAD_ONLY -> if (thread.threadId != mainThreadId) continue
+                FocusArea.MAIN_THREAD_ONLY, FocusArea.MAIN_THREAD_MINIFIED -> if (thread.threadId != mainThreadId) continue
                 FocusArea.BACKGROUND_THREADS_ONLY -> if (thread.threadId == mainThreadId) continue
                 FocusArea.ALL_THREADS, FocusArea.ALL_THREADS_MINIFIED -> {
                     // all threads pls
@@ -245,15 +246,16 @@ class TraceRepoImpl @Inject constructor(
     private fun String.applyFilters(
         focusArea: FocusArea
     ): String? {
-        if (focusArea != FocusArea.ALL_THREADS_MINIFIED) {
+        if (focusArea == FocusArea.ALL_THREADS_MINIFIED || focusArea == FocusArea.MAIN_THREAD_MINIFIED) {
+            var methodName: String? = this
+            for (filter in FILTERS) {
+                if (methodName == null) return null
+                methodName = filter.apply(methodName)
+            }
+            return methodName
+        } else {
             return this
         }
-        var methodName: String? = this
-        for (filter in FILTERS) {
-            if (methodName == null) return null
-            methodName = filter.apply(methodName)
-        }
-        return methodName
     }
 }
 
