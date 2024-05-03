@@ -7,6 +7,7 @@ import io.github.theapache64.perfsheet.core.filter.LineNoFilter
 import io.github.theapache64.perfsheet.model.Method
 import io.github.theapache64.perfsheet.model.Node
 import io.github.theapache64.perfsheet.model.ResultRow
+import io.github.theapache64.perfsheet.model.ThreadDetail
 import io.github.theapache64.perfsheet.traceparser.analyzer.AnalyzerResultImpl
 import io.github.theapache64.perfsheet.traceparser.analyzer.TraceAnalyzer
 import io.github.theapache64.perfsheet.traceparser.core.AnalyzerResult
@@ -23,7 +24,7 @@ enum class FocusArea {
 }
 
 interface TraceRepo {
-    fun init(beforeTrace: File, afterTrace: File, onProgress: (String) -> Unit)
+    fun init(beforeTrace: File, afterTrace: File?, onProgress: (String) -> Unit)
     fun parse(focusArea: FocusArea): Map<String, ResultRow>
 }
 
@@ -42,26 +43,30 @@ class TraceRepoImpl @Inject constructor(
     }
 
     private lateinit var beforeAnalysisResult: AnalyzerResultImpl
-    private lateinit var afterAnalysisResult: AnalyzerResultImpl
+    private var afterAnalysisResult: AnalyzerResultImpl? = null
     private lateinit var onProgress: (String) -> Unit
 
-    override fun init(beforeTrace: File, afterTrace: File, onProgress: (String) -> Unit) {
+    override fun init(beforeTrace: File, afterTrace: File?, onProgress: (String) -> Unit) {
         this.beforeAnalysisResult = traceAnalyzer.analyze(beforeTrace)
-        this.afterAnalysisResult = traceAnalyzer.analyze(afterTrace)
+        this.afterAnalysisResult = if (afterTrace != null) {
+            traceAnalyzer.analyze(afterTrace)
+        } else {
+            null
+        }
         this.onProgress = onProgress
     }
 
     override fun parse(
         focusArea: FocusArea,
     ): Map<String, ResultRow> {
-        val resultRow = mutableMapOf<String, ResultRow>()
+        val resultRows = mutableMapOf<String, ResultRow>()
         val beforeMap = beforeAnalysisResult.toMap(focusArea)
-        val afterMap = afterAnalysisResult.toMap(focusArea)
+        val afterMap = afterAnalysisResult?.toMap(focusArea)
 
-        val methodNames = beforeMap.keys + afterMap.keys
+        val methodNames = beforeMap.keys + (afterMap?.keys ?: emptySet())
         for (methodName in methodNames) {
             val beforeMethod = beforeMap[methodName]
-            val afterMethod = afterMap[methodName]
+            val afterMethod = afterMap?.get(methodName)
             val diffInMs = calculateDiff(beforeMethod, afterMethod)
 
             val beforeCount = beforeMethod?.nodes?.size ?: -1
@@ -71,42 +76,56 @@ class TraceRepoImpl @Inject constructor(
             val beforeThreadDetails = calculateThreadDetails(beforeMethod)
             val afterThreadDetails = calculateThreadDetails(afterMethod)
 
-            resultRow[methodName] = ResultRow(
-                name = methodName,
-                beforeDurationInMs = (beforeMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
-                afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
-                diffInMs = diffInMs,
-                beforeCount = beforeCount,
-                afterCount = afterCount,
-                countComparison = countLabel,
-                beforeThreadDetails = beforeThreadDetails,
-                afterThreadDetails = afterThreadDetails,
-                beforeComparison = summarise(
-                    focusArea = focusArea,
-                    before = beforeThreadDetails,
-                    compareWith = null
-                ).ifBlank { NOT_PRESENT },
-                afterComparison = summarise(
-                    focusArea = focusArea,
-                    before = afterThreadDetails,
-                    compareWith = beforeThreadDetails
-                ).ifBlank { NOT_PRESENT }
+            val beforeDurationInMs = (beforeMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong()
+            val beforeComparison = summarise(
+                focusArea = focusArea,
+                before = beforeThreadDetails,
+                compareWith = null
+            ).ifBlank { NOT_PRESENT }
 
-            )
+            resultRows[methodName] = if (afterMap == null) {
+                // single
+                ResultRow.Single(
+                    name = methodName,
+                    durationInMs = beforeDurationInMs,
+                    count = beforeCount,
+                    threadDetails = beforeThreadDetails,
+                    comparison = beforeComparison
+                )
+            } else {
+                // dual
+                ResultRow.Dual(
+                    name = methodName,
+                    beforeDurationInMs = beforeDurationInMs,
+                    afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
+                    diffInMs = diffInMs,
+                    beforeCount = beforeCount,
+                    afterCount = afterCount,
+                    countComparison = countLabel,
+                    beforeThreadDetails = beforeThreadDetails,
+                    afterThreadDetails = afterThreadDetails,
+                    beforeComparison = beforeComparison,
+                    afterComparison = summarise(
+                        focusArea = focusArea,
+                        before = afterThreadDetails,
+                        compareWith = beforeThreadDetails
+                    ).ifBlank { NOT_PRESENT }
+
+                )
+            }
         }
-        return resultRow.entries.sortedByDescending { it.value.diffInMs }.associateBy({ it.key }, { it.value })
-    }
-
-
-    private fun Long.notPresentIfMinusOne(): String {
-        if (this == -1L) return NOT_PRESENT
-        return this.toString()
+        return resultRows.entries.sortedByDescending {
+            when(val resultRow = it.value){
+                is ResultRow.Dual -> resultRow.diffInMs
+                is ResultRow.Single -> resultRow.durationInMs
+            }
+        }.associateBy({ it.key }, { it.value })
     }
 
     private fun summarise(
         focusArea: FocusArea,
-        before: List<ResultRow.ThreadDetail>,
-        compareWith: List<ResultRow.ThreadDetail>?
+        before: List<ThreadDetail>,
+        compareWith: List<ThreadDetail>?
     ): String {
 
         return before.joinToString(separator = "\n") { beforeThread ->
@@ -145,13 +164,13 @@ class TraceRepoImpl @Inject constructor(
         }
     }
 
-    private fun calculateThreadDetails(beforeMethod: Method?): List<ResultRow.ThreadDetail> {
-        val threadDetails = mutableListOf<ResultRow.ThreadDetail>()
+    private fun calculateThreadDetails(beforeMethod: Method?): List<ThreadDetail> {
+        val threadDetails = mutableListOf<ThreadDetail>()
         for (threadNode in beforeMethod?.nodes ?: emptyList()) {
             var threadDetail = threadDetails.find { it.threadName == threadNode.threadName }
             if (threadDetail == null) {
                 // first detail node
-                threadDetail = ResultRow.ThreadDetail(threadNode.threadName, noOfBlocks = 0, 0.0)
+                threadDetail = ThreadDetail(threadNode.threadName, noOfBlocks = 0, 0.0)
                 threadDetails.add(threadDetail)
             }
             threadDetail.noOfBlocks++

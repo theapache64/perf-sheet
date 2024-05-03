@@ -29,16 +29,13 @@ class AnalyzeViewModel @Inject constructor(
                 _statusMsg.value = "Args missing. Try `perf-sheet <before-trace> <after-trace>`"
             }
 
-            1 -> {
-                _statusMsg.value = """
-                    Single trace file analysis is not implemented yet. 
-                    Please vote : https://github.com/theapache64/perf-sheet/issues/1
-                """.trimIndent()
-            }
-
-            2 -> {
+            1, 2 -> {
                 val beforeTrace = File(args[0]).takeIf { it.exists() } ?: error("Before trace doesn't exist")
-                val afterTrace = File(args[1]).takeIf { it.exists() } ?: error("After trace doesn't exist")
+                val afterTrace = if (args.size == 2) {
+                    File(args[1]).takeIf { it.exists() } ?: error("After trace doesn't exist")
+                } else {
+                    null
+                }
                 analyzeAndCompare(beforeTrace, afterTrace)
                 _statusMsg.value = SUCCESS_MSG
             }
@@ -49,14 +46,22 @@ class AnalyzeViewModel @Inject constructor(
         }
     }
 
-    private fun analyzeAndCompare(beforeTrace: File, afterTrace: File) {
+    private fun analyzeAndCompare(beforeTrace: File, afterTrace: File?) {
         val onProgress: (String) -> Unit = {
             _statusMsg.value = it
         }
 
-        _statusMsg.value = "📖 Parsing traces... (this step may take a while)"
+        _statusMsg.value = if (afterTrace == null) {
+            "📖 Parsing trace... (this step may take a while)"
+        } else {
+            "📖 Parsing traces... (this step may take a while)"
+        }
         traceRepo.init(beforeTrace, afterTrace, onProgress)
-        _statusMsg.value = "🔍 Comparing traces..."
+        _statusMsg.value = if (afterTrace == null) {
+            "🔍 Parsing trace..."
+        } else {
+            "🔍 Comparing traces..."
+        }
 
         val allThreads = traceRepo.parse(focusArea = FocusArea.ALL_THREADS)
         val mainThread = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
@@ -64,12 +69,17 @@ class AnalyzeViewModel @Inject constructor(
         val allThreadsMinified = traceRepo.parse(focusArea = FocusArea.ALL_THREADS_MINIFIED)
         val mainThreadMinified = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_MINIFIED)
 
-        val excelFileName = "${beforeTrace.nameWithoutExtension}-vs-${afterTrace.nameWithoutExtension}.xlsx"
+        val excelFileName = if (afterTrace == null) {
+            "${beforeTrace.nameWithoutExtension}-perf-sheet.xlsx"
+        } else {
+            "${beforeTrace.nameWithoutExtension}-vs-${afterTrace.nameWithoutExtension}-perf-sheet.xlsx"
+        }
         val excelFile = File(beforeTrace.parent, excelFileName)
         _statusMsg.value = "📝 Writing to spreadsheet (${excelFile.name})... "
 
         excelRepo.make(
             excelFile,
+            isSingle = afterTrace == null,
             allThreads,
             mainThread,
             backgroundThreads,

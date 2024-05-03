@@ -1,6 +1,9 @@
 package io.github.theapache64.perfsheet.data.repo
 
 import io.github.theapache64.perfsheet.model.ResultRow
+import org.apache.poi.xssf.usermodel.XSSFCellStyle
+import org.apache.poi.xssf.usermodel.XSSFRow
+import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import java.io.File
 import javax.inject.Inject
@@ -8,6 +11,7 @@ import javax.inject.Inject
 interface ExcelRepo {
     fun make(
         xlsFile: File,
+        isSingle : Boolean,
         allThreadData: Map<String, ResultRow>,
         mainThreadData: Map<String, ResultRow>,
         backgroundThreadData: Map<String, ResultRow>,
@@ -28,7 +32,7 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         MAIN_THREAD_MINIFIED("Main Thread (minified)"),
     }
 
-    enum class Heading(
+    enum class DualHeading(
         val title: String,
         val colWidth : Int
     ) {
@@ -43,8 +47,20 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         AFTER_THREAD("After summary", 60);
     }
 
+    enum class SingleHeading(
+        val title: String,
+        val colWidth : Int
+    ) {
+        METHOD_NAME("Method Name", 60),
+        DURATION_MS("Duration (ms)", 13),
+        COUNT("Count", 13),
+        SUMMARY("Summary", 60)
+    }
+
+
     override fun make(
         xlsFile: File,
+        isSingle: Boolean,
         allThreadData: Map<String, ResultRow>,
         mainThreadData: Map<String, ResultRow>,
         backgroundThreadData: Map<String, ResultRow>,
@@ -83,11 +99,13 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
             val headerRow = sheet.createRow(0)
 
             // Heading
-            for ((index, heading) in Heading.entries.withIndex()) {
-                headerRow.createCell(index).apply {
-                    setCellValue(heading.title)
-                    cellStyle = headerStyle
-                    sheet.setColumnWidth(index, heading.colWidth * 256)
+            if(isSingle){
+                for ((index, heading) in SingleHeading.entries.withIndex()) {
+                    createHeading(headerRow, index, heading.title, heading.colWidth, headerStyle, sheet)
+                }
+            }else{
+                for ((index, heading) in DualHeading.entries.withIndex()) {
+                    createHeading(headerRow, index, heading.title, heading.colWidth, headerStyle, sheet)
                 }
             }
 
@@ -103,20 +121,44 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                 row.heightInPoints = 22f
 
                 row.createCell(0).setCellValue(methodName)
-                row.createCell(1).setCellValue(result.beforeDurationInMs.toDouble())
-                row.createCell(2).setCellValue(result.afterDurationInMs.toDouble())
-                row.createCell(3).setCellValue(result.diffInMs.toDouble())
-                row.createCell(4).setCellValue(result.beforeCount.toDouble())
-                row.createCell(5).setCellValue(result.afterCount.toDouble())
-                row.createCell(6).setCellValue(result.countComparison.toDouble())
-                row.createCell(7).setCellValue(result.beforeComparison)
-                row.createCell(8).setCellValue(result.afterComparison)
+                when(result){
+                    is ResultRow.Dual -> {
+                        row.createCell(1).setCellValue(result.beforeDurationInMs.toDouble())
+                        row.createCell(2).setCellValue(result.afterDurationInMs.toDouble())
+                        row.createCell(3).setCellValue(result.diffInMs.toDouble())
+                        row.createCell(4).setCellValue(result.beforeCount.toDouble())
+                        row.createCell(5).setCellValue(result.afterCount.toDouble())
+                        row.createCell(6).setCellValue(result.countComparison.toDouble())
+                        row.createCell(7).setCellValue(result.beforeComparison)
+                        row.createCell(8).setCellValue(result.afterComparison)
+                    }
+                    is ResultRow.Single -> {
+                        row.createCell(1).setCellValue(result.durationInMs.toDouble())
+                        row.createCell(2).setCellValue(result.count.toDouble())
+                        row.createCell(3).setCellValue(result.comparison)
+                    }
+                }
             }
         }
 
         onProgress("🚀 Writing to file: ${xlsFile.name}")
         workbook.write(xlsFile.outputStream())
         workbook.close()
+    }
+
+    private fun createHeading(
+        headerRow: XSSFRow,
+        index: Int,
+        title : String,
+        colWidth: Int,
+        headerStyle: XSSFCellStyle?,
+        sheet: XSSFSheet
+    ) {
+        headerRow.createCell(index).apply {
+            setCellValue(title)
+            cellStyle = headerStyle
+            sheet.setColumnWidth(index, colWidth * 256)
+        }
     }
 }
 

@@ -16,6 +16,7 @@ class TraceAnalyzer(
     var nameConverter: NameConverter = NoOpNameConverter
 
     fun analyze(traceFile: File): AnalyzerResultImpl {
+
         val vmTraceHandler = OnVmTraceHandler(log, nameConverter)
         VmTraceParser(traceFile, vmTraceHandler).parse()
 
