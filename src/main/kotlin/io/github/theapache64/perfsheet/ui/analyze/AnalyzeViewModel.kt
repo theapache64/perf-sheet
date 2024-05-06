@@ -58,7 +58,7 @@ class AnalyzeViewModel @Inject constructor(
         }
         traceRepo.init(beforeTrace, afterTrace, onProgress)
         _statusMsg.value = if (afterTrace == null) {
-            "🔍 Parsing trace..."
+            "🔍 Analyzing trace..."
         } else {
             "🔍 Comparing traces..."
         }
