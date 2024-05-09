@@ -48,7 +48,7 @@ after.trace before-vs-after.xlsx before.trace
 
 **Output**
 
-![image](https://github.com/theapache64/perf-sheet/assets/9678279/a502962a-0e47-4dbb-b664-33a2ac169414)
+![image](https://github.com/theapache64/perf-sheet/assets/9678279/8fed7ec7-1b23-4078-93ae-6f8b065b6fe7)
 
 ## ✍️ Author
 
