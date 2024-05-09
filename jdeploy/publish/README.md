@@ -29,7 +29,7 @@ perf-sheet before.trace after.trace
 ```bash                                                              ✘ INT
 ❯ ls
 after.trace  before.trace
-❯ perf-sheet before.trace after.trace
+❯ perf-sheet before.trace [after.trace]
 perf-sheet (0.0.2)
 📖 Parsing traces... (this step may take a while)
 🔍 Comparing traces...
