@@ -172,4 +172,5 @@ build
 gpm.json
 .DS_Store
 
-jdeploy-bundle/jdeploy.js
+jdeploy-bundle/
+jdeploy
