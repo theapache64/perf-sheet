@@ -5,7 +5,7 @@
   "main": "index.js",
   "preferGlobal": true,
   "repository": "https://github.com/theapache64/perf-sheet",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "jdeploy": {
     "jdk": false,
     "javaVersion": "17",
