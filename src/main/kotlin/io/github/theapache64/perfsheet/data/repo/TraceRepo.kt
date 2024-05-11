@@ -1,6 +1,7 @@
 package io.github.theapache64.perfsheet.data.repo
 
 import io.github.theapache64.perfsheet.core.filter.AnonFilter
+import io.github.theapache64.perfsheet.core.filter.FrameFilter
 import io.github.theapache64.perfsheet.core.filter.FrameworkCallsFilter
 import io.github.theapache64.perfsheet.core.filter.LastHyphenFilter
 import io.github.theapache64.perfsheet.core.filter.LineNoFilter
@@ -20,7 +21,8 @@ enum class FocusArea {
     MAIN_THREAD_ONLY,
     BACKGROUND_THREADS_ONLY,
     ALL_THREADS_MINIFIED,
-    MAIN_THREAD_MINIFIED
+    MAIN_THREAD_MINIFIED,
+    FRAMES
 }
 
 interface TraceRepo {
@@ -34,12 +36,13 @@ class TraceRepoImpl @Inject constructor(
 
     companion object {
         private const val NOT_PRESENT = "not present"
-        private val FILTERS = listOf(
+        private val TRACE_FILTERS = listOf(
             FrameworkCallsFilter(),
             AnonFilter(),
             LastHyphenFilter(),
             LineNoFilter(),
         )
+
     }
 
     private lateinit var beforeAnalysisResult: AnalyzerResultImpl
@@ -59,10 +62,63 @@ class TraceRepoImpl @Inject constructor(
     override fun parse(
         focusArea: FocusArea,
     ): Map<String, ResultRow> {
-        val resultRows = mutableMapOf<String, ResultRow>()
         val beforeMap = beforeAnalysisResult.toMap(focusArea)
         val afterMap = afterAnalysisResult?.toMap(focusArea)
 
+        val resultRows = when (focusArea) {
+            FocusArea.ALL_THREADS,
+            FocusArea.MAIN_THREAD_ONLY,
+            FocusArea.BACKGROUND_THREADS_ONLY,
+            FocusArea.ALL_THREADS_MINIFIED,
+            FocusArea.MAIN_THREAD_MINIFIED -> parseThreads(focusArea, beforeMap, afterMap)
+
+            FocusArea.FRAMES -> parseFrames(beforeMap, afterMap)
+        }
+        return resultRows.entries.sortedByDescending {
+            when (val resultRow = it.value) {
+                is ResultRow.DualTrace -> resultRow.diffInMs
+                is ResultRow.SingleTrace -> resultRow.durationInMs
+                is ResultRow.DualFrame -> resultRow.diffInMs
+                is ResultRow.SingleFrame -> resultRow.durationInMs
+            }
+        }.associateBy({ it.key }, { it.value })
+    }
+
+    private fun parseFrames(beforeMap: Map<String, Method>, afterMap: Map<String, Method>?): Map<String, ResultRow> {
+        val resultRows = mutableMapOf<String, ResultRow>()
+        val frameNames = beforeMap.keys + (afterMap?.keys ?: emptySet())
+        for (frameName in frameNames) {
+            val beforeMethod = beforeMap[frameName]
+            val afterMethod = afterMap?.get(frameName)
+            val diffInMs = calculateDiff(beforeMethod, afterMethod)
+
+            val beforeDurationInMs = (beforeMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong()
+
+            resultRows[frameName] = if (afterMap == null) {
+                // single
+                ResultRow.SingleFrame(
+                    name = frameName,
+                    durationInMs = beforeDurationInMs
+                )
+            } else {
+                // dual
+                ResultRow.DualFrame(
+                    name = frameName,
+                    beforeDurationInMs = beforeDurationInMs,
+                    afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
+                    diffInMs = diffInMs
+                )
+            }
+        }
+        return resultRows;
+    }
+
+    private fun parseThreads(
+        focusArea: FocusArea,
+        beforeMap: Map<String, Method>,
+        afterMap: Map<String, Method>?
+    ): Map<String, ResultRow> {
+        val resultRows = mutableMapOf<String, ResultRow>()
         val methodNames = beforeMap.keys + (afterMap?.keys ?: emptySet())
         for (methodName in methodNames) {
             val beforeMethod = beforeMap[methodName]
@@ -85,7 +141,7 @@ class TraceRepoImpl @Inject constructor(
 
             resultRows[methodName] = if (afterMap == null) {
                 // single
-                ResultRow.Single(
+                ResultRow.SingleTrace(
                     name = methodName,
                     durationInMs = beforeDurationInMs,
                     count = beforeCount,
@@ -94,7 +150,7 @@ class TraceRepoImpl @Inject constructor(
                 )
             } else {
                 // dual
-                ResultRow.Dual(
+                ResultRow.DualTrace(
                     name = methodName,
                     beforeDurationInMs = beforeDurationInMs,
                     afterDurationInMs = (afterMethod?.nodes?.sumOf { it.durationInMs } ?: -1).toLong(),
@@ -114,12 +170,8 @@ class TraceRepoImpl @Inject constructor(
                 )
             }
         }
-        return resultRows.entries.sortedByDescending {
-            when(val resultRow = it.value){
-                is ResultRow.Dual -> resultRow.diffInMs
-                is ResultRow.Single -> resultRow.durationInMs
-            }
-        }.associateBy({ it.key }, { it.value })
+
+        return resultRows
     }
 
     private fun summarise(
@@ -230,15 +282,20 @@ class TraceRepoImpl @Inject constructor(
             val thread = this.threads.find { it.threadId == threadId } ?: error("Thread not found: '$threadId'")
 
             when (focusArea) {
-                FocusArea.MAIN_THREAD_ONLY, FocusArea.MAIN_THREAD_MINIFIED -> if (thread.threadId != mainThreadId) continue
+                FocusArea.MAIN_THREAD_ONLY, FocusArea.MAIN_THREAD_MINIFIED, FocusArea.FRAMES -> if (thread.threadId != mainThreadId) continue
                 FocusArea.BACKGROUND_THREADS_ONLY -> if (thread.threadId == mainThreadId) continue
                 FocusArea.ALL_THREADS, FocusArea.ALL_THREADS_MINIFIED -> {
                     // all threads pls
                 }
             }
 
+            var id = 1
             for (method in allMethods) {
-                val methodName = method.name.applyFilters(focusArea) ?: continue
+                var methodName = method.name.applyFilters(focusArea) ?: continue
+                if (focusArea == FocusArea.FRAMES) {
+                    methodName = "$methodName#$id"
+                    id++
+                }
                 val traceMethod = resultMap.getOrPut(
                     methodName
                 ) {
@@ -252,7 +309,7 @@ class TraceRepoImpl @Inject constructor(
                 traceMethod.nodes.add(
                     Node(
                         threadName = thread.name,
-                        durationInMs = duration
+                        durationInMs = duration.roundToLong()
                     )
                 )
             }
@@ -265,15 +322,26 @@ class TraceRepoImpl @Inject constructor(
     private fun String.applyFilters(
         focusArea: FocusArea
     ): String? {
-        if (focusArea == FocusArea.ALL_THREADS_MINIFIED || focusArea == FocusArea.MAIN_THREAD_MINIFIED) {
-            var methodName: String? = this
-            for (filter in FILTERS) {
-                if (methodName == null) return null
-                methodName = filter.apply(methodName)
+        return when (focusArea) {
+            FocusArea.ALL_THREADS_MINIFIED,
+            FocusArea.MAIN_THREAD_MINIFIED -> {
+                var methodName: String? = this
+                for (filter in TRACE_FILTERS) {
+                    if (methodName == null) return null
+                    methodName = filter.apply(methodName)
+                }
+                methodName
             }
-            return methodName
-        } else {
-            return this
+
+            FocusArea.ALL_THREADS,
+            FocusArea.MAIN_THREAD_ONLY,
+            FocusArea.BACKGROUND_THREADS_ONLY -> {
+                this
+            }
+
+            FocusArea.FRAMES -> {
+                FrameFilter().apply(this)
+            }
         }
     }
 }

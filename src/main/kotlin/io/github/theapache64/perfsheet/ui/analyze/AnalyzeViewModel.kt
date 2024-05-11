@@ -68,6 +68,7 @@ class AnalyzeViewModel @Inject constructor(
         val backgroundThreads = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
         val allThreadsMinified = traceRepo.parse(focusArea = FocusArea.ALL_THREADS_MINIFIED)
         val mainThreadMinified = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_MINIFIED)
+        val frames = traceRepo.parse(focusArea = FocusArea.FRAMES)
 
         val excelFileName = if (afterTrace == null) {
             "${beforeTrace.nameWithoutExtension}-perf-sheet.xlsx"
@@ -78,13 +79,14 @@ class AnalyzeViewModel @Inject constructor(
         _statusMsg.value = "📝 Writing to spreadsheet (${excelFile.name})... "
 
         excelRepo.make(
-            excelFile,
+            xlsFile = excelFile,
             isSingle = afterTrace == null,
-            allThreads,
-            mainThread,
-            backgroundThreads,
-            allThreadsMinified,
-            mainThreadMinified,
+            allThreadData = allThreads,
+            mainThreadData = mainThread,
+            backgroundThreadData = backgroundThreads,
+            allThreadDataMinified = allThreadsMinified,
+            mainThreadMinified = mainThreadMinified,
+            frames = frames,
             onProgress = onProgress
         )
     }

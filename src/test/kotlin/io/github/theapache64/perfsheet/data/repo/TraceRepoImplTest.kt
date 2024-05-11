@@ -23,8 +23,8 @@ class TraceRepoImplTest {
     @Test
     fun parseTest() {
 
-        val beforeTrace = File("/Users/theapache64/Desktop/perf-sheet/before.trace")
-        val afterTrace = File("/Users/theapache64/Desktop/perf-sheet/after.trace")
+        val beforeTrace = File("/Users/theapache64/Desktop/bad-app/before.trace")
+        val afterTrace = File("/Users/theapache64/Desktop/bad-app/after.trace")
 
         traceRepo.init(beforeTrace, afterTrace) {
             println("QuickTag: TraceRepoImplTest:parseTest: $it")
@@ -34,17 +34,27 @@ class TraceRepoImplTest {
         val allThreadsMinifiedResult = traceRepo.parse(focusArea = FocusArea.ALL_THREADS_MINIFIED)
         val mainThreadOnly = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_ONLY)
         val backgroundThreadsOnly = traceRepo.parse(focusArea = FocusArea.BACKGROUND_THREADS_ONLY)
+        val mainThreadMinified = traceRepo.parse(focusArea = FocusArea.MAIN_THREAD_MINIFIED)
+        val frames = traceRepo.parse(focusArea = FocusArea.FRAMES)
 
         excelRepo.make(
-            File("/Users/theapache64/Desktop/perf-sheet/perf-sheet.xlsx"),
-            allThreadsResult,
-            mainThreadOnly,
-            backgroundThreadsOnly,
-            allThreadsMinifiedResult,
+            xlsFile = File("/Users/theapache64/Desktop/bad-app/perf-sheet.xlsx"),
+            isSingle = false,
+            allThreadData = allThreadsResult,
+            mainThreadData = mainThreadOnly,
+            backgroundThreadData = backgroundThreadsOnly,
+            allThreadDataMinified = allThreadsMinifiedResult,
+            mainThreadMinified = mainThreadMinified,
+            frames = frames,
             onProgress = {
                 println(it)
             }
         )
         assert(allThreadsResult.isNotEmpty())
+        assert(mainThreadOnly.isNotEmpty())
+        assert(backgroundThreadsOnly.isNotEmpty())
+        assert(allThreadsMinifiedResult.isNotEmpty())
+        assert(mainThreadMinified.isNotEmpty())
+        assert(frames.isNotEmpty())
     }
 }

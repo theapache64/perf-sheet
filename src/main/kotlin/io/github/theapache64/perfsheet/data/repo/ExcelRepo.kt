@@ -1,6 +1,17 @@
 package io.github.theapache64.perfsheet.data.repo
 
+import io.github.theapache64.perfsheet.data.repo.ExcelRepoImpl.SheetTypes.ALL_THREADS
+import io.github.theapache64.perfsheet.data.repo.ExcelRepoImpl.SheetTypes.ALL_THREADS_MINIFIED
+import io.github.theapache64.perfsheet.data.repo.ExcelRepoImpl.SheetTypes.BACKGROUND_THREADS
+import io.github.theapache64.perfsheet.data.repo.ExcelRepoImpl.SheetTypes.FRAMES
+import io.github.theapache64.perfsheet.data.repo.ExcelRepoImpl.SheetTypes.MAIN_THREAD
+import io.github.theapache64.perfsheet.data.repo.ExcelRepoImpl.SheetTypes.MAIN_THREAD_MINIFIED
+import io.github.theapache64.perfsheet.model.Heading
 import io.github.theapache64.perfsheet.model.ResultRow
+import io.github.theapache64.perfsheet.model.dualFrameHeadings
+import io.github.theapache64.perfsheet.model.dualTraceHeadings
+import io.github.theapache64.perfsheet.model.singleFrameHeadings
+import io.github.theapache64.perfsheet.model.singleTraceHeadings
 import org.apache.poi.xssf.usermodel.XSSFCellStyle
 import org.apache.poi.xssf.usermodel.XSSFRow
 import org.apache.poi.xssf.usermodel.XSSFSheet
@@ -11,12 +22,13 @@ import javax.inject.Inject
 interface ExcelRepo {
     fun make(
         xlsFile: File,
-        isSingle : Boolean,
+        isSingle: Boolean,
         allThreadData: Map<String, ResultRow>,
         mainThreadData: Map<String, ResultRow>,
         backgroundThreadData: Map<String, ResultRow>,
         allThreadDataMinified: Map<String, ResultRow>,
         mainThreadMinified: Map<String, ResultRow>,
+        frames: Map<String, ResultRow>,
         onProgress: (String) -> Unit,
     )
 }
@@ -30,31 +42,7 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         BACKGROUND_THREADS("Background Threads"),
         ALL_THREADS_MINIFIED("All Threads (minified)"),
         MAIN_THREAD_MINIFIED("Main Thread (minified)"),
-    }
-
-    enum class DualHeading(
-        val title: String,
-        val colWidth : Int
-    ) {
-        METHOD_NAME("Method Name", 60),
-        BEFORE_MS("Before (ms)", 13),
-        AFTER_MS("After (ms)", 13),
-        DIFF("Diff (ms)", 12),
-        BEFORE_COUNT("Before count", 13),
-        AFTER_COUNT("After count", 13),
-        COUNT_DIFF("Count diff", 18),
-        BEFORE_THREAD("Before summary", 60),
-        AFTER_THREAD("After summary", 60);
-    }
-
-    enum class SingleHeading(
-        val title: String,
-        val colWidth : Int
-    ) {
-        METHOD_NAME("Method Name", 60),
-        DURATION_MS("Duration (ms)", 13),
-        COUNT("Count", 13),
-        SUMMARY("Summary", 60)
+        FRAMES("Frames")
     }
 
 
@@ -66,16 +54,17 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         backgroundThreadData: Map<String, ResultRow>,
         allThreadDataMinified: Map<String, ResultRow>,
         mainThreadMinified: Map<String, ResultRow>,
-        onProgress: (String) -> Unit,
+        frames: Map<String, ResultRow>,
+        onProgress: (String) -> Unit
     ) {
         xlsFile.delete()
         val sheetMap = mapOf(
-            SheetTypes.ALL_THREADS to allThreadData,
-            SheetTypes.MAIN_THREAD to mainThreadData,
-            SheetTypes.BACKGROUND_THREADS to backgroundThreadData,
-            SheetTypes.ALL_THREADS_MINIFIED to allThreadDataMinified,
-            SheetTypes.MAIN_THREAD_MINIFIED to mainThreadMinified,
-
+            ALL_THREADS to allThreadData,
+            MAIN_THREAD to mainThreadData,
+            BACKGROUND_THREADS to backgroundThreadData,
+            ALL_THREADS_MINIFIED to allThreadDataMinified,
+            MAIN_THREAD_MINIFIED to mainThreadMinified,
+            FRAMES to frames
         )
 
 
@@ -99,13 +88,25 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
             val headerRow = sheet.createRow(0)
 
             // Heading
-            if(isSingle){
-                for ((index, heading) in SingleHeading.entries.withIndex()) {
-                    createHeading(headerRow, index, heading.title, heading.colWidth, headerStyle, sheet)
+            when (sheetType) {
+                ALL_THREADS,
+                MAIN_THREAD,
+                BACKGROUND_THREADS,
+                ALL_THREADS_MINIFIED,
+                MAIN_THREAD_MINIFIED -> {
+                    if (isSingle) {
+                        renderHeading(headerRow, headerStyle, sheet, singleTraceHeadings)
+                    } else {
+                        renderHeading(headerRow, headerStyle, sheet, dualTraceHeadings)
+                    }
                 }
-            }else{
-                for ((index, heading) in DualHeading.entries.withIndex()) {
-                    createHeading(headerRow, index, heading.title, heading.colWidth, headerStyle, sheet)
+
+                FRAMES -> {
+                    if (isSingle) {
+                        renderHeading(headerRow, headerStyle, sheet, singleFrameHeadings)
+                    } else {
+                        renderHeading(headerRow, headerStyle, sheet, dualFrameHeadings)
+                    }
                 }
             }
 
@@ -121,8 +122,8 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                 row.heightInPoints = 22f
 
                 row.createCell(0).setCellValue(methodName)
-                when(result){
-                    is ResultRow.Dual -> {
+                when (result) {
+                    is ResultRow.DualTrace -> {
                         row.createCell(1).setCellValue(result.beforeDurationInMs.toDouble())
                         row.createCell(2).setCellValue(result.afterDurationInMs.toDouble())
                         row.createCell(3).setCellValue(result.diffInMs.toDouble())
@@ -132,10 +133,20 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
                         row.createCell(7).setCellValue(result.beforeComparison)
                         row.createCell(8).setCellValue(result.afterComparison)
                     }
-                    is ResultRow.Single -> {
+
+                    is ResultRow.SingleTrace -> {
                         row.createCell(1).setCellValue(result.durationInMs.toDouble())
                         row.createCell(2).setCellValue(result.count.toDouble())
                         row.createCell(3).setCellValue(result.comparison)
+                    }
+
+                    is ResultRow.DualFrame -> {
+                        row.createCell(1).setCellValue(result.beforeDurationInMs.toDouble())
+                        row.createCell(2).setCellValue(result.afterDurationInMs.toDouble())
+                        row.createCell(3).setCellValue(result.diffInMs.toDouble())
+                    }
+                    is ResultRow.SingleFrame -> {
+                        row.createCell(1).setCellValue(result.durationInMs.toDouble())
                     }
                 }
             }
@@ -146,10 +157,21 @@ class ExcelRepoImpl @Inject constructor() : ExcelRepo {
         workbook.close()
     }
 
+    private fun renderHeading(
+        headerRow: XSSFRow,
+        headerStyle: XSSFCellStyle?,
+        sheet: XSSFSheet,
+        headings: List<Heading>
+    ) {
+        for ((index, heading) in headings.withIndex()) {
+            createHeading(headerRow, index, heading.title, heading.colWidth, headerStyle, sheet)
+        }
+    }
+
     private fun createHeading(
         headerRow: XSSFRow,
         index: Int,
-        title : String,
+        title: String,
         colWidth: Int,
         headerStyle: XSSFCellStyle?,
         sheet: XSSFSheet
