@@ -171,3 +171,5 @@ gradle-app.setting
 build
 gpm.json
 .DS_Store
+
+jdeploy-bundle/jdeploy.js
